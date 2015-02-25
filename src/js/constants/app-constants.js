@@ -3,18 +3,18 @@ module.exports = {
     undo: 'undo',
     redo: 'redo',
     
-    addToThing: 'addToThing',
-    removeFromThing: 'removeFromThing',
-    otherAction: 'otherAction'
+    typeStuff: 'typeStuff',
+    deleteStuff: 'deleteStuff',
+    setCursor: 'setCursor'
   },
 
   reverse: {
-    addToThing: 'removeFromThing',
-    removeFromThing: 'addToThing'
+    typeStuff: 'deleteStuff',
+    deleteStuff: 'typeStuff'
   },
 
   notForCommandManager: {
-    otherAction: 'otherAction'
+    setCursor: 'setCursor'
   }
 
 };

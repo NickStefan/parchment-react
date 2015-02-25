@@ -27206,7 +27206,7 @@ var APP = React.createClass({displayName: "APP",
     return (
       React.createElement("div", null, 
         React.createElement(MenuView, {doc: this.state.doc, docState: this.state.docState}), 
-        React.createElement(DocView, {doc: this.state.doc, state: this.state.docState})
+        React.createElement(DocView, {doc: this.state.doc, docState: this.state.docState})
       )
     )
   }
@@ -27226,12 +27226,14 @@ var LineView = require('./line');
 var BlockView = React.createClass({displayName: "BlockView",
 
   render: function(){
+    var blockIndex = this.props.blockIndex;
+    var lineStates = this.props.blockState.get('lines');
     var contentLines = this.props.block.get('lines')
     .toArray()
     // mutable array of immutables
     .map(function(line,i){
       return (
-        React.createElement(LineView, {key: i, line: line})
+        React.createElement(LineView, {key: i, lineIndex: i, blockIndex: blockIndex, line: line, lineState: lineStates.get(i)})
       )
     });
 
@@ -27278,22 +27280,50 @@ var AppActions = require('../actions/app-actions');
 var BlockView = require('./block');
 
 var DocView = React.createClass({displayName: "DocView",
+  componentDidMount: function(){
+    window.addEventListener('keydown', this.preventBrowserBackspace );
+  },
+
+
+  preventBrowserBackspace: function(e){
+    // this swallows backspace keys on any non-input element.
+    // prevent browser's backspace from popping browser history stack
+    var regex = /INPUT|SELECT|TEXTAREA/i;
+    if( e.which == 8 ){ // 8 == backspace
+      if(!regex.test(e.target.tagName) || e.target.disabled || e.target.readOnly ){
+          e.preventDefault();
+          e.stopPropagation();
+      }
+    }
+  },
+
+  type: function(e){
+    e.stopPropagation();
+    e.preventDefault();
+    AppActions.typeStuff(e.key);
+  },
 
   render: function(){
+    var self = this;
+    var blockStates = this.props.docState.get('blocks')
     var contentBlocks = this.props.doc.get('blocks')
     .toArray()
     // mutable array of immutables
     .map(function(block,i){
       return (
-        React.createElement(BlockView, {key: i, block: block})
+        React.createElement(BlockView, {key: i, blockIndex: i, block: block, blockState: blockStates.get(i)})
       )
     });
 
     return (
-      React.createElement("div", null, 
+      React.createElement("div", {tabIndex: -1, onKeyPress: this.type}, 
         contentBlocks 
       )
     )
+  },
+
+  componentWillUnmount: function(){
+    window.removeEventListener('keydown',this.preventBrowserBackspace);
   }
 });
 
@@ -27311,12 +27341,15 @@ var TextView = require('./text');
 var LineView = React.createClass({displayName: "LineView",
 
   render: function(){
+    var blockIndex = this.props.blockIndex;
+    var lineIndex = this.props.lineIndex;
+    var textStates = this.props.lineState.get('texts');
     var contentTexts = this.props.line.get('texts')
     .toArray()
     // mutable array of immutables
     .map(function(text,i){
       return (
-        React.createElement(TextView, {key: i, text: text})
+        React.createElement(TextView, {key: i, textIndex: i, lineIndex: lineIndex, blockIndex: blockIndex, text: text, textState: textStates.get(i)})
       )
     });
 
@@ -27336,16 +27369,6 @@ var React = require('react/dist/react-with-addons.js');
 var AppActions = require('../actions/app-actions');
 
 var MENU = React.createClass({displayName: "MENU",
-  up: function(e){
-    e.stopPropagation();
-    e.preventDefault();
-    AppActions.addToThing(1);
-  },
-  down: function(e){
-    e.stopPropagation();
-    e.preventDefault();
-    AppActions.removeFromThing(1);
-  },
 
   undo: function(e){
     e.stopPropagation();
@@ -27361,8 +27384,6 @@ var MENU = React.createClass({displayName: "MENU",
   render: function(){
     return (
       React.createElement("div", null, 
-        React.createElement("button", {onClick: this.up}, " Up "), 
-        React.createElement("button", {onClick: this.down}, " Down "), 
         React.createElement("button", {onClick: this.undo}, " undo "), 
         React.createElement("button", {onClick: this.redo}, " redo ")
       )
@@ -27380,13 +27401,34 @@ var classSet = React.addons.classSet;
 var AppActions = require('../actions/app-actions');
 
 var TextView = React.createClass({displayName: "TextView",
+	setCursor: function(e){
+    e.stopPropagation();
+    e.preventDefault();
+    var targetX = e.target.offsetLeft;
+    var targetWidth = e.target.offsetWidth;
+    var clickX = e.clientX;
+    var indexPixel = clickX - targetX;
+    var pixelRatio = indexPixel / targetWidth;
+    var cursorIndex = Math.floor(pixelRatio * this.props.text.get('value').length);
+    console.log(cursorIndex);
+    AppActions.setCursor(this.props.blockIndex, this.props.lineIndex, this.props.textIndex, cursorIndex, cursorIndex);
+	},
 
   render: function(){
     var value = this.props.text.get('value');
+    var selectionStart = this.props.textState.get('selectionStart');
+    var selectionEnd = this.props.textState.get('selectionEnd');
+    var cursor;
+
+    if (selectionStart !== null
+    && selectionStart === selectionEnd){
+    	cursor = React.createElement("span", null, "|")
+    }
+    console.log(this.props.textState.toJS())
 
     return (
-      React.createElement("span", {className: "word-view"}, 
-        value 
+      React.createElement("span", {onClick: this.setCursor, className: "word-view"}, 
+        value, cursor
       )
     )
   }
@@ -27400,18 +27442,18 @@ module.exports = {
     undo: 'undo',
     redo: 'redo',
     
-    addToThing: 'addToThing',
-    removeFromThing: 'removeFromThing',
-    otherAction: 'otherAction'
+    typeStuff: 'typeStuff',
+    deleteStuff: 'deleteStuff',
+    setCursor: 'setCursor'
   },
 
   reverse: {
-    addToThing: 'removeFromThing',
-    removeFromThing: 'addToThing'
+    typeStuff: 'deleteStuff',
+    deleteStuff: 'typeStuff'
   },
 
   notForCommandManager: {
-    otherAction: 'otherAction'
+    setCursor: 'setCursor'
   }
 
 };
@@ -27490,16 +27532,16 @@ AppStore.dispatchToken = AppDispatcher.register(function(payload){
   switch(action.type) {
 
     // state and data changes
-    case ActionTypes.addToThing:
-      docData = docDataMethods._someMethod(docData, payload.action.args);
+    case ActionTypes.typeStuff:
+      docData = docDataMethods._addText(docData, payload.action.args);
       break;
 
-    case ActionTypes.removeFromThing:
-      docData = docDataMethods._someOtherMethod(docData, payload.action.args);
+    case ActionTypes.deleteStuff:
+      docData = docDataMethods._removeText(docData, payload.action.args);
       break;
 
-    case ActionTypes.otherAction:
-      docState = docStateMethods._otherMethod(docState, payload.action.args);
+    case ActionTypes.setCursor:
+      docState = docStateMethods._setCursor(docState, payload.action.args);
       break;
     
     default:
@@ -27518,7 +27560,7 @@ var _ = {
 };
 
 /////////////////////////////
-// State Model
+// Data Model
 
 var defaultText = function(){
   return Immutable.Map({
@@ -27548,16 +27590,19 @@ var defaultData = function() {
 var data = defaultData();
 
 /////////////////////////////
-// Private State Methods
+// Private Data Methods
 var storeMethods = {
-  _someMethod: function(data, otherArg) {
-    return data.updateIn(['thing'],function(thing){
-      return thing.set('count', thing.get('count') + otherArg );
+  _addText: function(data, block, line, text, index, char) {
+    return data.updateIn(['blocks', block, 'lines', line, 'texts', text],function(textNode){
+      var strArr = textNode.get('value').str.split("")
+      strArr.splice(index,0,char)
+      str = strArr.join("");
+      return textNode.set('value', str);
     });
   },
-  _someOtherMethod: function(data, otherArg){
-    return data.updateIn(['thing'],function(thing){
-      return thing.set('count', thing.get('count') - otherArg );
+  _removeText: function(data, block, line, text, char){
+    return data.updateIn(['blocks', block, 'lines', line, 'texts', text],function(textNode){
+      return textNode.set('value', textNode.get('value').slice(0,-1) );
     });
   }
 
@@ -27595,11 +27640,29 @@ var _ = {
 /////////////////////////////
 // State Model
 
+var defaultText = function(){
+  return Immutable.Map({
+    selectionStart: null,
+    selectionEnd: null
+  });
+}
+
+var defaultLine = function(){
+  return Immutable.Map({
+    texts: Immutable.List([ defaultText() ])
+  });
+}
+
+var defaultBlock = function(){
+  return Immutable.Map({
+    type: 'paragraph',
+    lines: Immutable.List([ defaultLine() ])
+  });
+}
+
 var defaultState = function() {
   return Immutable.Map({
-    'thing': Immutable.Map({
-      'onOff': false
-    })
+    'blocks': Immutable.List([ defaultBlock() ])
   });
 };
 
@@ -27608,11 +27671,13 @@ var state = defaultState();
 /////////////////////////////
 // Private State Methods
 var stateMethods = {
-  _otherMethod: function(state, otherArg) {
-    return state.updateIn(['thing'],function(thing){
-      return thing.set('onOff', otherArg );
+  _setCursor: function(data, block, line, text, startIndex, endIndex) {
+    return data.updateIn(['blocks', block, 'lines', line, 'texts', text],function(textNode){
+      return textNode
+      .set('selectionStart', startIndex )
+      .set('selectionEnd', endIndex );
     });
-  }
+  },
 
 }
 

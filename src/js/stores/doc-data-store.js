@@ -4,7 +4,7 @@ var _ = {
 };
 
 /////////////////////////////
-// State Model
+// Data Model
 
 var defaultText = function(){
   return Immutable.Map({
@@ -34,16 +34,19 @@ var defaultData = function() {
 var data = defaultData();
 
 /////////////////////////////
-// Private State Methods
+// Private Data Methods
 var storeMethods = {
-  _someMethod: function(data, otherArg) {
-    return data.updateIn(['thing'],function(thing){
-      return thing.set('count', thing.get('count') + otherArg );
+  _addText: function(data, block, line, text, index, char) {
+    return data.updateIn(['blocks', block, 'lines', line, 'texts', text],function(textNode){
+      var strArr = textNode.get('value').str.split("")
+      strArr.splice(index,0,char)
+      str = strArr.join("");
+      return textNode.set('value', str);
     });
   },
-  _someOtherMethod: function(data, otherArg){
-    return data.updateIn(['thing'],function(thing){
-      return thing.set('count', thing.get('count') - otherArg );
+  _removeText: function(data, block, line, text, char){
+    return data.updateIn(['blocks', block, 'lines', line, 'texts', text],function(textNode){
+      return textNode.set('value', textNode.get('value').slice(0,-1) );
     });
   }
 

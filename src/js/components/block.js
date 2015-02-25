@@ -8,12 +8,14 @@ var LineView = require('./line');
 var BlockView = React.createClass({
 
   render: function(){
+    var blockIndex = this.props.blockIndex;
+    var lineStates = this.props.blockState.get('lines');
     var contentLines = this.props.block.get('lines')
     .toArray()
     // mutable array of immutables
     .map(function(line,i){
       return (
-        <LineView key={i} line={line}></LineView>
+        <LineView key={i} lineIndex={i} blockIndex={blockIndex}  line={line} lineState={lineStates.get(i)}></LineView>
       )
     });
 

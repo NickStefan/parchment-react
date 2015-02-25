@@ -6,11 +6,31 @@ var _ = {
 /////////////////////////////
 // State Model
 
+var defaultText = function(){
+  return Immutable.Map({
+    selectionStart: null,
+    selectionEnd: null
+  });
+}
+
+var defaultLine = function(){
+  return Immutable.Map({
+    texts: Immutable.List([ defaultText() ])
+  });
+}
+
+var defaultBlock = function(){
+  return Immutable.Map({
+    type: 'paragraph',
+    lines: Immutable.List([ defaultLine() ])
+  });
+}
+
 var defaultState = function() {
   return Immutable.Map({
-    'thing': Immutable.Map({
-      'onOff': false
-    })
+    'blocks': Immutable.List([ defaultBlock() ])
+    // LAST SELECTED
+    // THE KEY LISTENER GRABS THIS INFO AND SENDS KEY PRESSES TO THOSE NODES???
   });
 };
 
@@ -19,11 +39,13 @@ var state = defaultState();
 /////////////////////////////
 // Private State Methods
 var stateMethods = {
-  _otherMethod: function(state, otherArg) {
-    return state.updateIn(['thing'],function(thing){
-      return thing.set('onOff', otherArg );
+  _setCursor: function(data, block, line, text, startIndex, endIndex) {
+    return data.updateIn(['blocks', block, 'lines', line, 'texts', text],function(textNode){
+      return textNode
+      .set('selectionStart', startIndex )
+      .set('selectionEnd', endIndex );
     });
-  }
+  },
 
 }
 

@@ -35,7 +35,7 @@ var APP = React.createClass({
     return (
       <div>
         <MenuView doc={this.state.doc } docState={this.state.docState} />
-        <DocView doc={this.state.doc } state={this.state.docState} />
+        <DocView doc={this.state.doc } docState={this.state.docState} />
       </div>
     )
   }

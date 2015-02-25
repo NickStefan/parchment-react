@@ -12,7 +12,7 @@ var TextView = React.createClass({
     var clickX = e.clientX;
     var indexPixel = clickX - targetX;
     var pixelRatio = indexPixel / targetWidth;
-    var cursorIndex = Math.floor(pixelRatio * this.props.text.get('value').length);
+    var cursorIndex = Math.ceil(pixelRatio * this.props.text.get('value').length);
     console.log(cursorIndex);
     AppActions.setCursor(this.props.blockIndex, this.props.lineIndex, this.props.textIndex, cursorIndex, cursorIndex);
 	},
@@ -23,17 +23,25 @@ var TextView = React.createClass({
     var selectionEnd = this.props.textState.get('selectionEnd');
     var cursor;
 
-    if (selectionStart !== null
-    && selectionStart === selectionEnd){
-    	cursor = <span>|</span>
-    }
-    console.log(this.props.textState.toJS())
+    // if (selectionStart !== null
+    // && selectionStart === selectionEnd){
+    // 	cursor = <span>|</span>
+    // }
+    //console.log(this.props.textState.toJS())
 
     return (
       <span onClick={this.setCursor} className="word-view">
         { value }{cursor}
       </span>
     )
+  },
+
+  shouldComponentUpdate: function(nextProps,nextState){
+    if (this.props.textState === nextProps.textState &&
+        this.props.text === nextProps.text) {
+      return false;
+    }
+    return true;
   }
 });
 

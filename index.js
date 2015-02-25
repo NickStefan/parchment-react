@@ -27266,6 +27266,14 @@ var BlockView = React.createClass({displayName: "BlockView",
     }
 
     return block;
+  },
+
+  shouldComponentUpdate: function(nextProps,nextState){
+    if (this.props.blockState === nextProps.blockState &&
+        this.props.block === nextProps.block) {
+      return false;
+    }
+    return true;
   }
 });
 
@@ -27300,7 +27308,17 @@ var DocView = React.createClass({displayName: "DocView",
   type: function(e){
     e.stopPropagation();
     e.preventDefault();
-    AppActions.typeStuff(e.key);
+    var furthest = this.props.docState.get('selected')
+    .toArray()
+    .sort(function(a,b){
+      a = a.block + "_" + a.line + "_" + a.text + "_" + a.endIndex + "_";
+      b = b.block + "_" + b.line + "_" + b.text + "_" + b.endIndex + "_";
+      return a > b ? -1 : 1;
+    });
+    furthest = furthest[furthest.length - 1];
+    var block = furthest.block, line = furthest.line, text = furthest.text,
+    startIndex = furthest.startIndex, endIndex = furthest.endIndex;
+    AppActions.typeStuff(block, line, text, startIndex, endIndex, e.key);
   },
 
   render: function(){
@@ -27320,6 +27338,14 @@ var DocView = React.createClass({displayName: "DocView",
         contentBlocks 
       )
     )
+  },
+
+  shouldComponentUpdate: function(nextProps,nextState){
+    if (this.props.docState === nextProps.docState &&
+        this.props.doc === nextProps.doc) {
+      return false;
+    }
+    return true;
   },
 
   componentWillUnmount: function(){
@@ -27358,6 +27384,14 @@ var LineView = React.createClass({displayName: "LineView",
         contentTexts 
       )
     )
+  },
+
+    shouldComponentUpdate: function(nextProps,nextState){
+    if (this.props.lineState === nextProps.lineState &&
+        this.props.line === nextProps.line) {
+      return false;
+    }
+    return true;
   }
 });
 
@@ -27409,7 +27443,7 @@ var TextView = React.createClass({displayName: "TextView",
     var clickX = e.clientX;
     var indexPixel = clickX - targetX;
     var pixelRatio = indexPixel / targetWidth;
-    var cursorIndex = Math.floor(pixelRatio * this.props.text.get('value').length);
+    var cursorIndex = Math.ceil(pixelRatio * this.props.text.get('value').length);
     console.log(cursorIndex);
     AppActions.setCursor(this.props.blockIndex, this.props.lineIndex, this.props.textIndex, cursorIndex, cursorIndex);
 	},
@@ -27420,17 +27454,25 @@ var TextView = React.createClass({displayName: "TextView",
     var selectionEnd = this.props.textState.get('selectionEnd');
     var cursor;
 
-    if (selectionStart !== null
-    && selectionStart === selectionEnd){
-    	cursor = React.createElement("span", null, "|")
-    }
-    console.log(this.props.textState.toJS())
+    // if (selectionStart !== null
+    // && selectionStart === selectionEnd){
+    // 	cursor = <span>|</span>
+    // }
+    //console.log(this.props.textState.toJS())
 
     return (
       React.createElement("span", {onClick: this.setCursor, className: "word-view"}, 
         value, cursor
       )
     )
+  },
+
+  shouldComponentUpdate: function(nextProps,nextState){
+    if (this.props.textState === nextProps.textState &&
+        this.props.text === nextProps.text) {
+      return false;
+    }
+    return true;
   }
 });
 
@@ -27534,6 +27576,7 @@ AppStore.dispatchToken = AppDispatcher.register(function(payload){
     // state and data changes
     case ActionTypes.typeStuff:
       docData = docDataMethods._addText(docData, payload.action.args);
+      docState = docStateMethods._moveCursor(docState, payload.action.args);
       break;
 
     case ActionTypes.deleteStuff:
@@ -27592,15 +27635,15 @@ var data = defaultData();
 /////////////////////////////
 // Private Data Methods
 var storeMethods = {
-  _addText: function(data, block, line, text, index, char) {
+  _addText: function(data, block, line, text, startIndex, endIndex, char) {
     return data.updateIn(['blocks', block, 'lines', line, 'texts', text],function(textNode){
-      var strArr = textNode.get('value').str.split("")
-      strArr.splice(index,0,char)
+      var strArr = textNode.get('value').split("")
+      strArr.splice(startIndex, endIndex - startIndex, char)
       str = strArr.join("");
       return textNode.set('value', str);
     });
   },
-  _removeText: function(data, block, line, text, char){
+  _removeText: function(data, block, line, text, startIndex, endIndex, char){
     return data.updateIn(['blocks', block, 'lines', line, 'texts', text],function(textNode){
       return textNode.set('value', textNode.get('value').slice(0,-1) );
     });
@@ -27662,7 +27705,8 @@ var defaultBlock = function(){
 
 var defaultState = function() {
   return Immutable.Map({
-    'blocks': Immutable.List([ defaultBlock() ])
+    'blocks': Immutable.List([ defaultBlock() ]),
+    selected: Immutable.Set()
   });
 };
 
@@ -27671,13 +27715,41 @@ var state = defaultState();
 /////////////////////////////
 // Private State Methods
 var stateMethods = {
-  _setCursor: function(data, block, line, text, startIndex, endIndex) {
-    return data.updateIn(['blocks', block, 'lines', line, 'texts', text],function(textNode){
+  _setCursor: function(state, block, line, text, startIndex, endIndex) {
+    state = state.updateIn(['selected'],function(selected){
+
+      return selected.empty().add({
+        block: block, line: line, text: text, startIndex: startIndex, endIndex: endIndex
+      });
+    });
+    return state.updateIn(['blocks', block, 'lines', line, 'texts', text],function(textNode){
       return textNode
       .set('selectionStart', startIndex )
       .set('selectionEnd', endIndex );
     });
   },
+
+  _moveCursor: function(state){
+    var furthest = state.get('selected')
+    .toArray()
+    .sort(function(a,b){
+      a = a.block + "_" + a.line + "_" + a.text + "_" + a.endIndex + "_";
+      b = b.block + "_" + b.line + "_" + b.text + "_" + b.endIndex + "_";
+      return a > b ? -1 : 1;
+    });
+    furthest = furthest[furthest.length - 1];
+    var block = furthest.block, line = furthest.line, text = furthest.text,
+    startIndex = furthest.startIndex, endIndex = furthest.endIndex;
+
+    return state.updateIn(['selected'],function(selected){
+      return selected
+      .remove(furthest)
+      .add({block: block, line: line, text: text,
+        startIndex: startIndex + 1,
+        endIndex: endIndex + 1
+      });
+    });
+  }
 
 }
 

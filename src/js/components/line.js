@@ -25,6 +25,14 @@ var LineView = React.createClass({
         { contentTexts }
       </span>
     )
+  },
+
+    shouldComponentUpdate: function(nextProps,nextState){
+    if (this.props.lineState === nextProps.lineState &&
+        this.props.line === nextProps.line) {
+      return false;
+    }
+    return true;
   }
 });
 

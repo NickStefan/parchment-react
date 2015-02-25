@@ -36,15 +36,15 @@ var data = defaultData();
 /////////////////////////////
 // Private Data Methods
 var storeMethods = {
-  _addText: function(data, block, line, text, index, char) {
+  _addText: function(data, block, line, text, startIndex, endIndex, char) {
     return data.updateIn(['blocks', block, 'lines', line, 'texts', text],function(textNode){
-      var strArr = textNode.get('value').str.split("")
-      strArr.splice(index,0,char)
+      var strArr = textNode.get('value').split("")
+      strArr.splice(startIndex, endIndex - startIndex, char)
       str = strArr.join("");
       return textNode.set('value', str);
     });
   },
-  _removeText: function(data, block, line, text, char){
+  _removeText: function(data, block, line, text, startIndex, endIndex, char){
     return data.updateIn(['blocks', block, 'lines', line, 'texts', text],function(textNode){
       return textNode.set('value', textNode.get('value').slice(0,-1) );
     });

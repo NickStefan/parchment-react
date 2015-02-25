@@ -48,6 +48,14 @@ var BlockView = React.createClass({
     }
 
     return block;
+  },
+
+  shouldComponentUpdate: function(nextProps,nextState){
+    if (this.props.blockState === nextProps.blockState &&
+        this.props.block === nextProps.block) {
+      return false;
+    }
+    return true;
   }
 });
 

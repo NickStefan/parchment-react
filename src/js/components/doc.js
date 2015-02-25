@@ -26,7 +26,17 @@ var DocView = React.createClass({
   type: function(e){
     e.stopPropagation();
     e.preventDefault();
-    AppActions.typeStuff(e.key);
+    var furthest = this.props.docState.get('selected')
+    .toArray()
+    .sort(function(a,b){
+      a = a.block + "_" + a.line + "_" + a.text + "_" + a.endIndex + "_";
+      b = b.block + "_" + b.line + "_" + b.text + "_" + b.endIndex + "_";
+      return a > b ? -1 : 1;
+    });
+    furthest = furthest[furthest.length - 1];
+    var block = furthest.block, line = furthest.line, text = furthest.text,
+    startIndex = furthest.startIndex, endIndex = furthest.endIndex;
+    AppActions.typeStuff(block, line, text, startIndex, endIndex, e.key);
   },
 
   render: function(){
@@ -46,6 +56,14 @@ var DocView = React.createClass({
         { contentBlocks }
       </div>
     )
+  },
+
+  shouldComponentUpdate: function(nextProps,nextState){
+    if (this.props.docState === nextProps.docState &&
+        this.props.doc === nextProps.doc) {
+      return false;
+    }
+    return true;
   },
 
   componentWillUnmount: function(){

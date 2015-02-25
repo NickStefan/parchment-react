@@ -1,21 +1,21 @@
 {
-  "name": "react-broiler-pan",
+  "name": "bc-doc",
   "version": "0.0.0",
   "description": "",
-  "main": "./dist/js/example.js",
+  "main": "./dist/js/bc-doc.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/NickStefan/react-broiler-pan.git"
+    "url": "https://github.com/NickStefan/bc-doc.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/NickStefan/react-broiler-pan/issues"
+    "url": "https://github.com/NickStefan/bc-doc/issues"
   },
-  "homepage": "https://github.com/NickStefan/react-broiler-pan",
+  "homepage": "https://github.com/NickStefan/bc-doc",
   "devDependencies": {
     "gulp": "^3.8.10",
     "gulp-browserify": "^0.5.1",

@@ -8,13 +8,13 @@ var AppConstants = require('../constants/app-constants');
 var ActionTypes = AppConstants.ActionTypes;
 var CHANGE_EVENT = 'change';
 
-var exampleDataStore = require('../stores/exampleDataStore');
-var exampleDataMethods = exampleDataStore.storeMethods;
-var exampleData = exampleDataStore.data;
+var docDataStore = require('../stores/doc-data-store');
+var docDataMethods = docDataStore.storeMethods;
+var docData = docDataStore.data;
 
-var exampleStateStore = require('../stores/exampleStateStore');
-var exampleStateMethods = exampleStateStore.stateMethods;
-var exampleState = exampleStateStore.state;
+var docStateStore = require('../stores/doc-state-store');
+var docStateMethods = docStateStore.stateMethods;
+var docState = docStateStore.state;
 
 /////////////////////////////
 // Store Public Methods
@@ -28,11 +28,11 @@ var AppStore = _.extend(EventEmitter.prototype, {
   removeEventListener: function(callback){
     this.removeEventListener(CHANGE_EVENT, callback);
   },
-  getExample: function(){
-    return exampleData;
+  getDoc: function(){
+    return docData;
   },
-  getExampleState: function(){
-    return exampleState;
+  getDocState: function(){
+    return docState;
   }
 });
 
@@ -44,15 +44,15 @@ AppStore.dispatchToken = AppDispatcher.register(function(payload){
 
     // state and data changes
     case ActionTypes.addToThing:
-      exampleData = exampleDataMethods._someMethod(exampleData, payload.action.args);
+      docData = docDataMethods._someMethod(docData, payload.action.args);
       break;
 
     case ActionTypes.removeFromThing:
-      exampleData = exampleDataMethods._someOtherMethod(exampleData, payload.action.args);
+      docData = docDataMethods._someOtherMethod(docData, payload.action.args);
       break;
 
     case ActionTypes.otherAction:
-      exampleState = exampleStateMethods._otherMethod(exampleState, payload.action.args);
+      docState = docStateMethods._otherMethod(docState, payload.action.args);
       break;
     
     default:

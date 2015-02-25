@@ -6362,8 +6362,11 @@ function isIterateeCall(value, index, object) {
   } else {
     prereq = type == 'string' && index in object;
   }
-  var other = object[index];
-  return prereq && (value === value ? value === other : other !== other);
+  if (prereq) {
+    var other = object[index];
+    return value === value ? value === other : other !== other;
+  }
+  return false;
 }
 
 module.exports = isIterateeCall;
@@ -27086,7 +27089,7 @@ var AppActions = _.mapValues(ActionTypes, function(fnName){
 module.exports = AppActions;
 
 
-},{"../actions/command-manager":53,"../constants/app-constants":57,"../dispatchers/app-dispatcher":58,"lodash/lang/toArray":40,"lodash/object/extend":42,"lodash/object/has":43,"lodash/object/mapValues":46}],53:[function(require,module,exports){
+},{"../actions/command-manager":53,"../constants/app-constants":60,"../dispatchers/app-dispatcher":61,"lodash/lang/toArray":40,"lodash/object/extend":42,"lodash/object/has":43,"lodash/object/mapValues":46}],53:[function(require,module,exports){
 
 var LocalCommandManager = function(AppDispatcher, io){
 
@@ -27169,22 +27172,22 @@ module.exports = LocalCommandManager;
 var React = require('react/dist/react-with-addons.js');
 var AppStore = require('../stores/app-store');
 
-var MENU = require('./menu');
-var THING = require('./thing');
+var MenuView = require('./menu');
+var DocView = require('./doc');
 
-function getExample(){
-  return AppStore.getExample();
+function getDoc(){
+  return AppStore.getDoc();
 }
 
-function getExampleState(){
-  return AppStore.getExampleState();
+function getDocState(){
+  return AppStore.getDocState();
 }
 
 var APP = React.createClass({displayName: "APP",
   getInitialState: function(){
     return {
-      example: getExample(),
-      exampleState: getExampleState()
+      doc: getDoc(),
+      docState: getDocState()
     };
   },
   componentWillMount: function(){
@@ -27195,15 +27198,15 @@ var APP = React.createClass({displayName: "APP",
   },
   _onChange: function(){
     this.setState({
-      example: getExample(),
-      exampleState: getExampleState()
+      doc: getDoc(),
+      docState: getDocState()
     });
   },
   render: function(){
     return (
       React.createElement("div", null, 
-        React.createElement(MENU, {example: this.state.example, exampleState: this.state.exampleState}), 
-        React.createElement(THING, {thing: this.state.example.get('thing'), state: this.state.exampleState.get('thing')})
+        React.createElement(MenuView, {doc: this.state.doc, docState: this.state.docState}), 
+        React.createElement(DocView, {doc: this.state.doc, state: this.state.docState})
       )
     )
   }
@@ -27212,7 +27215,122 @@ var APP = React.createClass({displayName: "APP",
 module.exports = APP;
 
 
-},{"../stores/app-store":60,"./menu":55,"./thing":56,"react/dist/react-with-addons.js":51}],55:[function(require,module,exports){
+},{"../stores/app-store":63,"./doc":56,"./menu":58,"react/dist/react-with-addons.js":51}],55:[function(require,module,exports){
+var React = require('react/dist/react-with-addons.js');
+var classSet = React.addons.classSet;
+
+var AppActions = require('../actions/app-actions');
+
+var LineView = require('./line');
+
+var BlockView = React.createClass({displayName: "BlockView",
+
+  render: function(){
+    var contentLines = this.props.block.get('lines')
+    .toArray()
+    // mutable array of immutables
+    .map(function(line,i){
+      return (
+        React.createElement(LineView, {key: i, line: line})
+      )
+    });
+
+    var tag = this.props.block.get('type');
+    var block;
+
+    switch(tag) {
+      case 'paragraph':
+        block = React.createElement("p", null, contentLines)
+        break;
+
+      case 'header1':
+        block = React.createElement("h1", null, contentLines)
+        break;
+      case 'header2':
+        block = React.createElement("h2", null, contentLines)
+        break;
+      case 'header3':
+        block = React.createElement("h3", null, contentLines)
+        break;
+      case 'header4':
+        block = React.createElement("h4", null, contentLines)
+        break;
+      case 'header5':
+        block = React.createElement("h5", null, contentLines)
+        break;
+      case 'header6':
+        block = React.createElement("h6", null, contentLines)
+        break;
+    }
+
+    return block;
+  }
+});
+
+module.exports = BlockView;
+
+},{"../actions/app-actions":52,"./line":57,"react/dist/react-with-addons.js":51}],56:[function(require,module,exports){
+var React = require('react/dist/react-with-addons.js');
+var classSet = React.addons.classSet;
+
+var AppActions = require('../actions/app-actions');
+
+var BlockView = require('./block');
+
+var DocView = React.createClass({displayName: "DocView",
+
+  render: function(){
+    var contentBlocks = this.props.doc.get('blocks')
+    .toArray()
+    // mutable array of immutables
+    .map(function(block,i){
+      return (
+        React.createElement(BlockView, {key: i, block: block})
+      )
+    });
+
+    return (
+      React.createElement("div", null, 
+        contentBlocks 
+      )
+    )
+  }
+});
+
+module.exports = DocView;
+
+
+},{"../actions/app-actions":52,"./block":55,"react/dist/react-with-addons.js":51}],57:[function(require,module,exports){
+var React = require('react/dist/react-with-addons.js');
+var classSet = React.addons.classSet;
+
+var AppActions = require('../actions/app-actions');
+
+var TextView = require('./text');
+
+var LineView = React.createClass({displayName: "LineView",
+
+  render: function(){
+    var contentTexts = this.props.line.get('texts')
+    .toArray()
+    // mutable array of immutables
+    .map(function(text,i){
+      return (
+        React.createElement(TextView, {key: i, text: text})
+      )
+    });
+
+    return (
+      React.createElement("span", {className: "line-view"}, 
+        contentTexts 
+      )
+    )
+  }
+});
+
+module.exports = LineView;
+
+},{"../actions/app-actions":52,"./text":59,"react/dist/react-with-addons.js":51}],58:[function(require,module,exports){
 var React = require('react/dist/react-with-addons.js');
 
 var AppActions = require('../actions/app-actions');
@@ -27255,40 +27373,28 @@ var MENU = React.createClass({displayName: "MENU",
 module.exports = MENU;
 
 
-},{"../actions/app-actions":52,"react/dist/react-with-addons.js":51}],56:[function(require,module,exports){
+},{"../actions/app-actions":52,"react/dist/react-with-addons.js":51}],59:[function(require,module,exports){
 var React = require('react/dist/react-with-addons.js');
 var classSet = React.addons.classSet;
 
 var AppActions = require('../actions/app-actions');
 
-var THING = React.createClass({displayName: "THING",
-  colorIt: function(e){
-    e.stopPropagation();
-    e.preventDefault();
-    var bool = this.props.state.get('onOff') ? true : false;
-    AppActions.otherAction(bool);
-  },
+var TextView = React.createClass({displayName: "TextView",
 
   render: function(){
-    console.log(this.props.state.get('onOff'))
-    var classState = classSet({
-      'color': this.props.state.get('onOff')
-    });
+    var value = this.props.text.get('value');
 
     return (
-      React.createElement("div", null, 
-        React.createElement("h1", {onClick:  this.colorIt, className: classState }, 
-           this.props.thing.get('count') 
-        )
+      React.createElement("span", {className: "word-view"}, 
+        value 
       )
     )
   }
 });
 
-module.exports = THING;
+module.exports = TextView;
 
-
-},{"../actions/app-actions":52,"react/dist/react-with-addons.js":51}],57:[function(require,module,exports){
+},{"../actions/app-actions":52,"react/dist/react-with-addons.js":51}],60:[function(require,module,exports){
 module.exports = {
   ActionTypes: {
     undo: 'undo',
@@ -27310,7 +27416,7 @@ module.exports = {
 
 };
 
-},{}],58:[function(require,module,exports){
+},{}],61:[function(require,module,exports){
 var Dispatcher = require('flux').Dispatcher;
 var AppConstants = require('../constants/app-constants');
 var ActionTypes = AppConstants.ActionTypes;
@@ -27332,13 +27438,13 @@ var AppDispatcher = _.mapValues(ActionTypes,function(fnName){
 module.exports = _.extend(new Dispatcher, AppDispatcher);
 
 
-},{"../constants/app-constants":57,"flux":1,"lodash/object/extend":42,"lodash/object/mapValues":46}],59:[function(require,module,exports){
+},{"../constants/app-constants":60,"flux":1,"lodash/object/extend":42,"lodash/object/mapValues":46}],62:[function(require,module,exports){
 
 var EXAMPLE = require('./components/app');
 
 module.exports = EXAMPLE;
 
-},{"./components/app":54}],60:[function(require,module,exports){
+},{"./components/app":54}],63:[function(require,module,exports){
 var EventEmitter = require('events').EventEmitter;
 var _ = {
   extend: require('lodash/object/extend')
@@ -27349,13 +27455,13 @@ var AppConstants = require('../constants/app-constants');
 var ActionTypes = AppConstants.ActionTypes;
 var CHANGE_EVENT = 'change';
 
-var exampleDataStore = require('../stores/exampleDataStore');
-var exampleDataMethods = exampleDataStore.storeMethods;
-var exampleData = exampleDataStore.data;
+var docDataStore = require('../stores/doc-data-store');
+var docDataMethods = docDataStore.storeMethods;
+var docData = docDataStore.data;
 
-var exampleStateStore = require('../stores/exampleStateStore');
-var exampleStateMethods = exampleStateStore.stateMethods;
-var exampleState = exampleStateStore.state;
+var docStateStore = require('../stores/doc-state-store');
+var docStateMethods = docStateStore.stateMethods;
+var docState = docStateStore.state;
 
 /////////////////////////////
 // Store Public Methods
@@ -27369,11 +27475,11 @@ var AppStore = _.extend(EventEmitter.prototype, {
   removeEventListener: function(callback){
     this.removeEventListener(CHANGE_EVENT, callback);
   },
-  getExample: function(){
-    return exampleData;
+  getDoc: function(){
+    return docData;
   },
-  getExampleState: function(){
-    return exampleState;
+  getDocState: function(){
+    return docState;
   }
 });
 
@@ -27385,15 +27491,15 @@ AppStore.dispatchToken = AppDispatcher.register(function(payload){
 
     // state and data changes
     case ActionTypes.addToThing:
-      exampleData = exampleDataMethods._someMethod(exampleData, payload.action.args);
+      docData = docDataMethods._someMethod(docData, payload.action.args);
       break;
 
     case ActionTypes.removeFromThing:
-      exampleData = exampleDataMethods._someOtherMethod(exampleData, payload.action.args);
+      docData = docDataMethods._someOtherMethod(docData, payload.action.args);
       break;
 
     case ActionTypes.otherAction:
-      exampleState = exampleStateMethods._otherMethod(exampleState, payload.action.args);
+      docState = docStateMethods._otherMethod(docState, payload.action.args);
       break;
     
     default:
@@ -27405,7 +27511,7 @@ AppStore.dispatchToken = AppDispatcher.register(function(payload){
 
 module.exports = AppStore;
 
-},{"../constants/app-constants":57,"../dispatchers/app-dispatcher":58,"../stores/exampleDataStore":61,"../stores/exampleStateStore":62,"events":4,"lodash/object/extend":42}],61:[function(require,module,exports){
+},{"../constants/app-constants":60,"../dispatchers/app-dispatcher":61,"../stores/doc-data-store":64,"../stores/doc-state-store":65,"events":4,"lodash/object/extend":42}],64:[function(require,module,exports){
 var Immutable = require('immutable');
 var _ = {
   mapValues: require('lodash/object/mapValues')
@@ -27414,11 +27520,28 @@ var _ = {
 /////////////////////////////
 // State Model
 
+var defaultText = function(){
+  return Immutable.Map({
+    value: 'bob'
+  });
+}
+
+var defaultLine = function(){
+  return Immutable.Map({
+    texts: Immutable.List([ defaultText() ])
+  });
+}
+
+var defaultBlock = function(){
+  return Immutable.Map({
+    type: 'paragraph',
+    lines: Immutable.List([ defaultLine() ])
+  });
+}
+
 var defaultData = function() {
   return Immutable.Map({
-    'thing': Immutable.Map({
-      'count': 0
-    })
+    'blocks': Immutable.List([ defaultBlock() ])
   });
 };
 
@@ -27463,7 +27586,7 @@ module.exports = {
   data: data
 };
 
-},{"immutable":5,"lodash/object/mapValues":46}],62:[function(require,module,exports){
+},{"immutable":5,"lodash/object/mapValues":46}],65:[function(require,module,exports){
 var Immutable = require('immutable');
 var _ = {
   mapValues: require('lodash/object/mapValues')
@@ -27516,4 +27639,4 @@ module.exports = {
   state: state
 }
 
-},{"immutable":5,"lodash/object/mapValues":46}]},{},[59])
+},{"immutable":5,"lodash/object/mapValues":46}]},{},[62])

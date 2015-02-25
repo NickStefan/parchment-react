@@ -1,22 +1,22 @@
 var React = require('react/dist/react-with-addons.js');
 var AppStore = require('../stores/app-store');
 
-var MENU = require('./menu');
-var THING = require('./thing');
+var MenuView = require('./menu');
+var DocView = require('./doc');
 
-function getExample(){
-  return AppStore.getExample();
+function getDoc(){
+  return AppStore.getDoc();
 }
 
-function getExampleState(){
-  return AppStore.getExampleState();
+function getDocState(){
+  return AppStore.getDocState();
 }
 
 var APP = React.createClass({
   getInitialState: function(){
     return {
-      example: getExample(),
-      exampleState: getExampleState()
+      doc: getDoc(),
+      docState: getDocState()
     };
   },
   componentWillMount: function(){
@@ -27,15 +27,15 @@ var APP = React.createClass({
   },
   _onChange: function(){
     this.setState({
-      example: getExample(),
-      exampleState: getExampleState()
+      doc: getDoc(),
+      docState: getDocState()
     });
   },
   render: function(){
     return (
       <div>
-        <MENU example={this.state.example} exampleState={this.state.exampleState} />
-        <THING thing={this.state.example.get('thing')} state={this.state.exampleState.get('thing')} />
+        <MenuView doc={this.state.doc } docState={this.state.docState} />
+        <DocView doc={this.state.doc } state={this.state.docState} />
       </div>
     )
   }

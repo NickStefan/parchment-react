@@ -6,11 +6,28 @@ var _ = {
 /////////////////////////////
 // State Model
 
+var defaultText = function(){
+  return Immutable.Map({
+    value: 'bob'
+  });
+}
+
+var defaultLine = function(){
+  return Immutable.Map({
+    texts: Immutable.List([ defaultText() ])
+  });
+}
+
+var defaultBlock = function(){
+  return Immutable.Map({
+    type: 'paragraph',
+    lines: Immutable.List([ defaultLine() ])
+  });
+}
+
 var defaultData = function() {
   return Immutable.Map({
-    'thing': Immutable.Map({
-      'count': 0
-    })
+    'blocks': Immutable.List([ defaultBlock() ])
   });
 };
 

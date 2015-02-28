@@ -30,8 +30,8 @@ var TextView = React.createClass({
     //console.log(this.props.textState.toJS())
 
     return (
-      <span onClick={this.setCursor} className="word-view">
-        { value }{cursor}
+      <span className="word-view">
+        { value }
       </span>
     )
   },

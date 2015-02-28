@@ -27366,6 +27366,49 @@ var TextView = require('./text');
 
 var LineView = React.createClass({displayName: "LineView",
 
+  setCursor: function(e){
+    e.stopPropagation();
+    e.preventDefault();
+    console.log('click')
+
+    // ----------------------5px
+    // <span><span>3px<span></span>6px
+
+    // build the lineWords array obj
+    var lineWords = [];
+
+    // this.getDOMNode.children
+    // .forEach(function(text){
+    //    from 0 to word.length
+    //        lineWords.push(word);
+
+      // text.offsetLeft to text.offsetLeft + text.outterwidth
+        // lineWords.push(text); ??? or the text index, that would be better...
+        // how to get the cursor index inside of that word ???
+    //}
+
+    // targetWord = lineWords[px] || _.last(lineWords);
+
+    // OR dont go by line. 
+    // instead pass block click callback to each word
+    // use old calculations
+
+    // pros by line: easier to calculate where to put the index and cursor
+    // cons by line: have to manually figure out how much of each text to put on each line
+
+    // pros by block: dont have to figure out how much for each line
+    // cons by block: have to calculate where to put the index and cursor
+
+    var targetX = e.target.offsetLeft;
+    var targetWidth = e.target.offsetWidth;
+    var clickX = e.clientX;
+    var indexPixel = clickX - targetX;
+    var pixelRatio = indexPixel / targetWidth;
+    var cursorIndex = Math.ceil(pixelRatio * this.props.text.get('value').length);
+
+    AppActions.setCursor(this.props.blockIndex, this.props.lineIndex, textIndex, cursorIndex, cursorIndex);
+  },
+
   render: function(){
     var blockIndex = this.props.blockIndex;
     var lineIndex = this.props.lineIndex;
@@ -27380,13 +27423,13 @@ var LineView = React.createClass({displayName: "LineView",
     });
 
     return (
-      React.createElement("span", {className: "line-view"}, 
+      React.createElement("span", {onClick: this.setCursor, className: "line-view"}, 
         contentTexts 
       )
     )
   },
 
-    shouldComponentUpdate: function(nextProps,nextState){
+  shouldComponentUpdate: function(nextProps,nextState){
     if (this.props.lineState === nextProps.lineState &&
         this.props.line === nextProps.line) {
       return false;
@@ -27461,8 +27504,8 @@ var TextView = React.createClass({displayName: "TextView",
     //console.log(this.props.textState.toJS())
 
     return (
-      React.createElement("span", {onClick: this.setCursor, className: "word-view"}, 
-        value, cursor
+      React.createElement("span", {className: "word-view"}, 
+        value 
       )
     )
   },
@@ -27718,7 +27761,7 @@ var stateMethods = {
   _setCursor: function(state, block, line, text, startIndex, endIndex) {
     state = state.updateIn(['selected'],function(selected){
 
-      return selected.empty().add({
+      return selected.clear().add({
         block: block, line: line, text: text, startIndex: startIndex, endIndex: endIndex
       });
     });

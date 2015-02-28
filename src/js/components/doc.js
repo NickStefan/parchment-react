@@ -7,7 +7,7 @@ var BlockView = require('./block');
 
 var DocView = React.createClass({
   componentDidMount: function(){
-    window.addEventListener('keydown', this.preventBrowserBackspace );
+    //window.addEventListener('keydown', this.preventBrowserBackspace );
   },
 
 
@@ -26,17 +26,12 @@ var DocView = React.createClass({
   type: function(e){
     e.stopPropagation();
     e.preventDefault();
-    var furthest = this.props.docState.get('selected')
-    .toArray()
-    .sort(function(a,b){
-      a = a.block + "_" + a.line + "_" + a.text + "_" + a.endIndex + "_";
-      b = b.block + "_" + b.line + "_" + b.text + "_" + b.endIndex + "_";
-      return a > b ? -1 : 1;
-    });
-    furthest = furthest[furthest.length - 1];
-    var block = furthest.block, line = furthest.line, text = furthest.text,
-    startIndex = furthest.startIndex, endIndex = furthest.endIndex;
-    AppActions.typeStuff(block, line, text, startIndex, endIndex, e.key);
+    var block = this.props.docState.get('selection').get('block');
+    var text = this.props.docState.get('selection').get('text');
+    var startIndex = this.props.docState.get('selection').get('startIndex');
+    var endIndex = this.props.docState.get('selection').get('endIndex');
+
+    AppActions.typeStuff(block, text, startIndex, endIndex, e.key);
   },
 
   render: function(){
@@ -52,7 +47,7 @@ var DocView = React.createClass({
     });
 
     return (
-      <div tabIndex={-1} onKeyPress={this.type}>
+      <div tabIndex={-1} contentEditable={true} onKeyPress={this.type}>
         { contentBlocks }
       </div>
     )

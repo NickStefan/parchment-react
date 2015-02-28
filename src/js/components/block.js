@@ -3,19 +3,19 @@ var classSet = React.addons.classSet;
 
 var AppActions = require('../actions/app-actions');
 
-var LineView = require('./line');
+var TextView = require('./text');
 
 var BlockView = React.createClass({
 
   render: function(){
     var blockIndex = this.props.blockIndex;
-    var lineStates = this.props.blockState.get('lines');
-    var contentLines = this.props.block.get('lines')
+    var textStates = this.props.blockState.get('texts');
+    var contentTexts = this.props.block.get('texts')
     .toArray()
     // mutable array of immutables
-    .map(function(line,i){
+    .map(function(text,i){
       return (
-        <LineView key={i} lineIndex={i} blockIndex={blockIndex}  line={line} lineState={lineStates.get(i)}></LineView>
+        <TextView key={i} textIndex={i} blockIndex={blockIndex} text={text} textState={textStates.get(i)}></TextView>
       )
     });
 
@@ -24,26 +24,26 @@ var BlockView = React.createClass({
 
     switch(tag) {
       case 'paragraph':
-        block = <p>{contentLines}</p>
+        block = <p>{contentTexts}</p>
         break;
 
       case 'header1':
-        block = <h1>{contentLines}</h1>
+        block = <h1>{contentTexts}</h1>
         break;
       case 'header2':
-        block = <h2>{contentLines}</h2>
+        block = <h2>{contentTexts}</h2>
         break;
       case 'header3':
-        block = <h3>{contentLines}</h3>
+        block = <h3>{contentTexts}</h3>
         break;
       case 'header4':
-        block = <h4>{contentLines}</h4>
+        block = <h4>{contentTexts}</h4>
         break;
       case 'header5':
-        block = <h5>{contentLines}</h5>
+        block = <h5>{contentTexts}</h5>
         break;
       case 'header6':
-        block = <h6>{contentLines}</h6>
+        block = <h6>{contentTexts}</h6>
         break;
     }
 

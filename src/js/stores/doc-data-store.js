@@ -12,16 +12,10 @@ var defaultText = function(){
   });
 }
 
-var defaultLine = function(){
-  return Immutable.Map({
-    texts: Immutable.List([ defaultText() ])
-  });
-}
-
 var defaultBlock = function(){
   return Immutable.Map({
     type: 'paragraph',
-    lines: Immutable.List([ defaultLine() ])
+    texts: Immutable.List([ defaultText() ])
   });
 }
 
@@ -36,16 +30,16 @@ var data = defaultData();
 /////////////////////////////
 // Private Data Methods
 var storeMethods = {
-  _addText: function(data, block, line, text, startIndex, endIndex, char) {
-    return data.updateIn(['blocks', block, 'lines', line, 'texts', text],function(textNode){
+  _addText: function(data, block, text, startIndex, endIndex, char) {
+    return data.updateIn(['blocks', block, 'texts', text],function(textNode){
       var strArr = textNode.get('value').split("")
       strArr.splice(startIndex, endIndex - startIndex, char)
       str = strArr.join("");
       return textNode.set('value', str);
     });
   },
-  _removeText: function(data, block, line, text, startIndex, endIndex, char){
-    return data.updateIn(['blocks', block, 'lines', line, 'texts', text],function(textNode){
+  _removeText: function(data, block, text, startIndex, endIndex, char){
+    return data.updateIn(['blocks', block, 'texts', text],function(textNode){
       return textNode.set('value', textNode.get('value').slice(0,-1) );
     });
   }

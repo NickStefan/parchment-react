@@ -27089,7 +27089,7 @@ var AppActions = _.mapValues(ActionTypes, function(fnName){
 module.exports = AppActions;
 
 
-},{"../actions/command-manager":53,"../constants/app-constants":60,"../dispatchers/app-dispatcher":61,"lodash/lang/toArray":40,"lodash/object/extend":42,"lodash/object/has":43,"lodash/object/mapValues":46}],53:[function(require,module,exports){
+},{"../actions/command-manager":53,"../constants/app-constants":59,"../dispatchers/app-dispatcher":60,"lodash/lang/toArray":40,"lodash/object/extend":42,"lodash/object/has":43,"lodash/object/mapValues":46}],53:[function(require,module,exports){
 
 var LocalCommandManager = function(AppDispatcher, io){
 
@@ -27215,25 +27215,25 @@ var APP = React.createClass({displayName: "APP",
 module.exports = APP;
 
 
-},{"../stores/app-store":63,"./doc":56,"./menu":58,"react/dist/react-with-addons.js":51}],55:[function(require,module,exports){
+},{"../stores/app-store":62,"./doc":56,"./menu":57,"react/dist/react-with-addons.js":51}],55:[function(require,module,exports){
 var React = require('react/dist/react-with-addons.js');
 var classSet = React.addons.classSet;
 
 var AppActions = require('../actions/app-actions');
 
-var LineView = require('./line');
+var TextView = require('./text');
 
 var BlockView = React.createClass({displayName: "BlockView",
 
   render: function(){
     var blockIndex = this.props.blockIndex;
-    var lineStates = this.props.blockState.get('lines');
-    var contentLines = this.props.block.get('lines')
+    var textStates = this.props.blockState.get('texts');
+    var contentTexts = this.props.block.get('texts')
     .toArray()
     // mutable array of immutables
-    .map(function(line,i){
+    .map(function(textSpan,i){
       return (
-        React.createElement(LineView, {key: i, lineIndex: i, blockIndex: blockIndex, line: line, lineState: lineStates.get(i)})
+        React.createElement(TextView, {key: i, textIndex: i, blockIndex: blockIndex, text: text, textState: textStates.get(i)})
       )
     });
 
@@ -27242,26 +27242,26 @@ var BlockView = React.createClass({displayName: "BlockView",
 
     switch(tag) {
       case 'paragraph':
-        block = React.createElement("p", null, contentLines)
+        block = React.createElement("p", null, contentTexts)
         break;
 
       case 'header1':
-        block = React.createElement("h1", null, contentLines)
+        block = React.createElement("h1", null, contentTexts)
         break;
       case 'header2':
-        block = React.createElement("h2", null, contentLines)
+        block = React.createElement("h2", null, contentTexts)
         break;
       case 'header3':
-        block = React.createElement("h3", null, contentLines)
+        block = React.createElement("h3", null, contentTexts)
         break;
       case 'header4':
-        block = React.createElement("h4", null, contentLines)
+        block = React.createElement("h4", null, contentTexts)
         break;
       case 'header5':
-        block = React.createElement("h5", null, contentLines)
+        block = React.createElement("h5", null, contentTexts)
         break;
       case 'header6':
-        block = React.createElement("h6", null, contentLines)
+        block = React.createElement("h6", null, contentTexts)
         break;
     }
 
@@ -27279,7 +27279,7 @@ var BlockView = React.createClass({displayName: "BlockView",
 
 module.exports = BlockView;
 
-},{"../actions/app-actions":52,"./line":57,"react/dist/react-with-addons.js":51}],56:[function(require,module,exports){
+},{"../actions/app-actions":52,"./text":58,"react/dist/react-with-addons.js":51}],56:[function(require,module,exports){
 var React = require('react/dist/react-with-addons.js');
 var classSet = React.addons.classSet;
 
@@ -27289,7 +27289,7 @@ var BlockView = require('./block');
 
 var DocView = React.createClass({displayName: "DocView",
   componentDidMount: function(){
-    window.addEventListener('keydown', this.preventBrowserBackspace );
+    //window.addEventListener('keydown', this.preventBrowserBackspace );
   },
 
 
@@ -27308,17 +27308,12 @@ var DocView = React.createClass({displayName: "DocView",
   type: function(e){
     e.stopPropagation();
     e.preventDefault();
-    var furthest = this.props.docState.get('selected')
-    .toArray()
-    .sort(function(a,b){
-      a = a.block + "_" + a.line + "_" + a.text + "_" + a.endIndex + "_";
-      b = b.block + "_" + b.line + "_" + b.text + "_" + b.endIndex + "_";
-      return a > b ? -1 : 1;
-    });
-    furthest = furthest[furthest.length - 1];
-    var block = furthest.block, line = furthest.line, text = furthest.text,
-    startIndex = furthest.startIndex, endIndex = furthest.endIndex;
-    AppActions.typeStuff(block, line, text, startIndex, endIndex, e.key);
+    var block = this.props.docState.get('selection').get('block');
+    var textSpan = this.props.docState.get('selection').get('textSpan');
+    var startIndex = this.props.docState.get('selection').get('startIndex');
+    var endIndex = this.props.docState.get('selection').get('endIndex');
+
+    AppActions.typeStuff(block, textSpan, startIndex, endIndex, e.key);
   },
 
   render: function(){
@@ -27334,7 +27329,7 @@ var DocView = React.createClass({displayName: "DocView",
     });
 
     return (
-      React.createElement("div", {tabIndex: -1, onKeyPress: this.type}, 
+      React.createElement("div", {tabIndex: -1, contentEditable: true, onKeyPress: this.type}, 
         contentBlocks 
       )
     )
@@ -27357,90 +27352,6 @@ module.exports = DocView;
 
 
 },{"../actions/app-actions":52,"./block":55,"react/dist/react-with-addons.js":51}],57:[function(require,module,exports){
-var React = require('react/dist/react-with-addons.js');
-var classSet = React.addons.classSet;
-
-var AppActions = require('../actions/app-actions');
-
-var TextView = require('./text');
-
-var LineView = React.createClass({displayName: "LineView",
-
-  setCursor: function(e){
-    e.stopPropagation();
-    e.preventDefault();
-    console.log('click')
-
-    // ----------------------5px
-    // <span><span>3px<span></span>6px
-
-    // build the lineWords array obj
-    var lineWords = [];
-
-    // this.getDOMNode.children
-    // .forEach(function(text){
-    //    from 0 to word.length
-    //        lineWords.push(word);
-
-      // text.offsetLeft to text.offsetLeft + text.outterwidth
-        // lineWords.push(text); ??? or the text index, that would be better...
-        // how to get the cursor index inside of that word ???
-    //}
-
-    // targetWord = lineWords[px] || _.last(lineWords);
-
-    // OR dont go by line. 
-    // instead pass block click callback to each word
-    // use old calculations
-
-    // pros by line: easier to calculate where to put the index and cursor
-    // cons by line: have to manually figure out how much of each text to put on each line
-
-    // pros by block: dont have to figure out how much for each line
-    // cons by block: have to calculate where to put the index and cursor
-
-    var targetX = e.target.offsetLeft;
-    var targetWidth = e.target.offsetWidth;
-    var clickX = e.clientX;
-    var indexPixel = clickX - targetX;
-    var pixelRatio = indexPixel / targetWidth;
-    var cursorIndex = Math.ceil(pixelRatio * this.props.text.get('value').length);
-
-    AppActions.setCursor(this.props.blockIndex, this.props.lineIndex, textIndex, cursorIndex, cursorIndex);
-  },
-
-  render: function(){
-    var blockIndex = this.props.blockIndex;
-    var lineIndex = this.props.lineIndex;
-    var textStates = this.props.lineState.get('texts');
-    var contentTexts = this.props.line.get('texts')
-    .toArray()
-    // mutable array of immutables
-    .map(function(text,i){
-      return (
-        React.createElement(TextView, {key: i, textIndex: i, lineIndex: lineIndex, blockIndex: blockIndex, text: text, textState: textStates.get(i)})
-      )
-    });
-
-    return (
-      React.createElement("span", {onClick: this.setCursor, className: "line-view"}, 
-        contentTexts 
-      )
-    )
-  },
-
-  shouldComponentUpdate: function(nextProps,nextState){
-    if (this.props.lineState === nextProps.lineState &&
-        this.props.line === nextProps.line) {
-      return false;
-    }
-    return true;
-  }
-});
-
-module.exports = LineView;
-
-},{"../actions/app-actions":52,"./text":59,"react/dist/react-with-addons.js":51}],58:[function(require,module,exports){
 var React = require('react/dist/react-with-addons.js');
 
 var AppActions = require('../actions/app-actions');
@@ -27471,7 +27382,7 @@ var MENU = React.createClass({displayName: "MENU",
 module.exports = MENU;
 
 
-},{"../actions/app-actions":52,"react/dist/react-with-addons.js":51}],59:[function(require,module,exports){
+},{"../actions/app-actions":52,"react/dist/react-with-addons.js":51}],58:[function(require,module,exports){
 var React = require('react/dist/react-with-addons.js');
 var classSet = React.addons.classSet;
 
@@ -27481,21 +27392,15 @@ var TextView = React.createClass({displayName: "TextView",
 	setCursor: function(e){
     e.stopPropagation();
     e.preventDefault();
-    var targetX = e.target.offsetLeft;
-    var targetWidth = e.target.offsetWidth;
-    var clickX = e.clientX;
-    var indexPixel = clickX - targetX;
-    var pixelRatio = indexPixel / targetWidth;
-    var cursorIndex = Math.ceil(pixelRatio * this.props.text.get('value').length);
-    console.log(cursorIndex);
-    AppActions.setCursor(this.props.blockIndex, this.props.lineIndex, this.props.textIndex, cursorIndex, cursorIndex);
+    var selection = window.getSelection();
+    AppActions.setCursor(this.props.blockIndex, this.props.textIndex, selection);
 	},
 
   render: function(){
     var value = this.props.text.get('value');
-    var selectionStart = this.props.textState.get('selectionStart');
-    var selectionEnd = this.props.textState.get('selectionEnd');
-    var cursor;
+    // var selectionStart = this.props.textState.get('selectionStart');
+    // var selectionEnd = this.props.textState.get('selectionEnd');
+    // var cursor;
 
     // if (selectionStart !== null
     // && selectionStart === selectionEnd){
@@ -27504,7 +27409,7 @@ var TextView = React.createClass({displayName: "TextView",
     //console.log(this.props.textState.toJS())
 
     return (
-      React.createElement("span", {className: "word-view"}, 
+      React.createElement("span", {onClick: this.setCursor, className: "word-view"}, 
         value 
       )
     )
@@ -27521,7 +27426,7 @@ var TextView = React.createClass({displayName: "TextView",
 
 module.exports = TextView;
 
-},{"../actions/app-actions":52,"react/dist/react-with-addons.js":51}],60:[function(require,module,exports){
+},{"../actions/app-actions":52,"react/dist/react-with-addons.js":51}],59:[function(require,module,exports){
 module.exports = {
   ActionTypes: {
     undo: 'undo',
@@ -27543,7 +27448,7 @@ module.exports = {
 
 };
 
-},{}],61:[function(require,module,exports){
+},{}],60:[function(require,module,exports){
 var Dispatcher = require('flux').Dispatcher;
 var AppConstants = require('../constants/app-constants');
 var ActionTypes = AppConstants.ActionTypes;
@@ -27565,13 +27470,13 @@ var AppDispatcher = _.mapValues(ActionTypes,function(fnName){
 module.exports = _.extend(new Dispatcher, AppDispatcher);
 
 
-},{"../constants/app-constants":60,"flux":1,"lodash/object/extend":42,"lodash/object/mapValues":46}],62:[function(require,module,exports){
+},{"../constants/app-constants":59,"flux":1,"lodash/object/extend":42,"lodash/object/mapValues":46}],61:[function(require,module,exports){
 
 var EXAMPLE = require('./components/app');
 
 module.exports = EXAMPLE;
 
-},{"./components/app":54}],63:[function(require,module,exports){
+},{"./components/app":54}],62:[function(require,module,exports){
 var EventEmitter = require('events').EventEmitter;
 var _ = {
   extend: require('lodash/object/extend')
@@ -27639,7 +27544,7 @@ AppStore.dispatchToken = AppDispatcher.register(function(payload){
 
 module.exports = AppStore;
 
-},{"../constants/app-constants":60,"../dispatchers/app-dispatcher":61,"../stores/doc-data-store":64,"../stores/doc-state-store":65,"events":4,"lodash/object/extend":42}],64:[function(require,module,exports){
+},{"../constants/app-constants":59,"../dispatchers/app-dispatcher":60,"../stores/doc-data-store":63,"../stores/doc-state-store":64,"events":4,"lodash/object/extend":42}],63:[function(require,module,exports){
 var Immutable = require('immutable');
 var _ = {
   mapValues: require('lodash/object/mapValues')
@@ -27654,16 +27559,10 @@ var defaultText = function(){
   });
 }
 
-var defaultLine = function(){
-  return Immutable.Map({
-    texts: Immutable.List([ defaultText() ])
-  });
-}
-
 var defaultBlock = function(){
   return Immutable.Map({
     type: 'paragraph',
-    lines: Immutable.List([ defaultLine() ])
+    texts: Immutable.List([ defaultText() ])
   });
 }
 
@@ -27678,16 +27577,16 @@ var data = defaultData();
 /////////////////////////////
 // Private Data Methods
 var storeMethods = {
-  _addText: function(data, block, line, text, startIndex, endIndex, char) {
-    return data.updateIn(['blocks', block, 'lines', line, 'texts', text],function(textNode){
+  _addText: function(data, block, text, startIndex, endIndex, char) {
+    return data.updateIn(['blocks', block, 'texts', text],function(textNode){
       var strArr = textNode.get('value').split("")
       strArr.splice(startIndex, endIndex - startIndex, char)
       str = strArr.join("");
       return textNode.set('value', str);
     });
   },
-  _removeText: function(data, block, line, text, startIndex, endIndex, char){
-    return data.updateIn(['blocks', block, 'lines', line, 'texts', text],function(textNode){
+  _removeText: function(data, block, text, startIndex, endIndex, char){
+    return data.updateIn(['blocks', block, 'texts', text],function(textNode){
       return textNode.set('value', textNode.get('value').slice(0,-1) );
     });
   }
@@ -27717,7 +27616,7 @@ module.exports = {
   data: data
 };
 
-},{"immutable":5,"lodash/object/mapValues":46}],65:[function(require,module,exports){
+},{"immutable":5,"lodash/object/mapValues":46}],64:[function(require,module,exports){
 var Immutable = require('immutable');
 var _ = {
   mapValues: require('lodash/object/mapValues')
@@ -27733,23 +27632,17 @@ var defaultText = function(){
   });
 }
 
-var defaultLine = function(){
-  return Immutable.Map({
-    texts: Immutable.List([ defaultText() ])
-  });
-}
-
 var defaultBlock = function(){
   return Immutable.Map({
     type: 'paragraph',
-    lines: Immutable.List([ defaultLine() ])
+    texts: Immutable.List([ defaultText() ])
   });
 }
 
 var defaultState = function() {
   return Immutable.Map({
-    'blocks': Immutable.List([ defaultBlock() ]),
-    selected: Immutable.Set()
+    'block': null,
+    'text': null
   });
 };
 
@@ -27758,7 +27651,7 @@ var state = defaultState();
 /////////////////////////////
 // Private State Methods
 var stateMethods = {
-  _setCursor: function(state, block, line, text, startIndex, endIndex) {
+  _setCursor: function(state, block, text, selection) {
     state = state.updateIn(['selected'],function(selected){
 
       return selected.clear().add({
@@ -27819,4 +27712,4 @@ module.exports = {
   state: state
 }
 
-},{"immutable":5,"lodash/object/mapValues":46}]},{},[62])
+},{"immutable":5,"lodash/object/mapValues":46}]},{},[61])

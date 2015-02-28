@@ -13,23 +13,20 @@ var defaultText = function(){
   });
 }
 
-var defaultLine = function(){
-  return Immutable.Map({
-    texts: Immutable.List([ defaultText() ])
-  });
-}
-
 var defaultBlock = function(){
   return Immutable.Map({
     type: 'paragraph',
-    lines: Immutable.List([ defaultLine() ])
+    texts: Immutable.List([ defaultText() ])
   });
 }
 
 var defaultState = function() {
   return Immutable.Map({
-    'blocks': Immutable.List([ defaultBlock() ]),
-    selected: Immutable.Set()
+    'block': null,
+    'text': null,
+    'nativeSelection': null,
+    'startOffset': null,
+    'endOffset': null
   });
 };
 
@@ -38,40 +35,15 @@ var state = defaultState();
 /////////////////////////////
 // Private State Methods
 var stateMethods = {
-  _setCursor: function(state, block, line, text, startIndex, endIndex) {
-    state = state.updateIn(['selected'],function(selected){
-
-      return selected.clear().add({
-        block: block, line: line, text: text, startIndex: startIndex, endIndex: endIndex
-      });
-    });
-    return state.updateIn(['blocks', block, 'lines', line, 'texts', text],function(textNode){
-      return textNode
-      .set('selectionStart', startIndex )
-      .set('selectionEnd', endIndex );
-    });
+  _setCursor: function(state, block, text, selection) {
+    state = state
+      .set('block',block)
+      .set('text',text)
+      .set('nativeSelection', selection);
   },
 
   _moveCursor: function(state){
-    var furthest = state.get('selected')
-    .toArray()
-    .sort(function(a,b){
-      a = a.block + "_" + a.line + "_" + a.text + "_" + a.endIndex + "_";
-      b = b.block + "_" + b.line + "_" + b.text + "_" + b.endIndex + "_";
-      return a > b ? -1 : 1;
-    });
-    furthest = furthest[furthest.length - 1];
-    var block = furthest.block, line = furthest.line, text = furthest.text,
-    startIndex = furthest.startIndex, endIndex = furthest.endIndex;
-
-    return state.updateIn(['selected'],function(selected){
-      return selected
-      .remove(furthest)
-      .add({block: block, line: line, text: text,
-        startIndex: startIndex + 1,
-        endIndex: endIndex + 1
-      });
-    });
+    
   }
 
 }

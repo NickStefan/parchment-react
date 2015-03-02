@@ -32,8 +32,8 @@ var data = defaultData();
 var storeMethods = {
   _addText: function(data, block, text, startIndex, endIndex, char) {
     return data.updateIn(['blocks', block, 'texts', text],function(textNode){
-      var strArr = textNode.get('value').split("")
-      strArr.splice(startIndex, endIndex - startIndex, char)
+      var strArr = textNode.get('value').split("");
+      strArr.splice(startIndex, endIndex - startIndex, char);
       str = strArr.join("");
       return textNode.set('value', str);
     });

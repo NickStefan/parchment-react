@@ -22,11 +22,12 @@ var defaultBlock = function(){
 
 var defaultState = function() {
   return Immutable.Map({
-    'block': null,
-    'text': null,
-    'nativeSelection': null,
-    'startOffset': null,
-    'endOffset': null
+    'blocks': Immutable.List([ defaultBlock() ]),
+    'selection': Immutable.Map({
+      'block': null,
+      'text': null,
+      'nativeSelection': null
+    })
   });
 };
 
@@ -36,14 +37,28 @@ var state = defaultState();
 // Private State Methods
 var stateMethods = {
   _setCursor: function(state, block, text, selection) {
-    state = state
+    return state = state.updateIn(['selection'],function(selectionObj){
+      return selectionObj
       .set('block',block)
       .set('text',text)
+      .set('startIndex', selection.baseOffset)
+      .set('endIndex', selection.extentOffset)
       .set('nativeSelection', selection);
+    });
+  },
+
+  _setSelection: function(state, block, text, startIndex, block2, text2, endIndex, char) {
+    var range = document.createRange()
+    range.setStart(node1, start);
+    range.setEnd(node2, end);
+    var sel = window.getSelection()
+    sel.removeAllRanges();
+    sel.addRange( range );
+    return sel; 
   },
 
   _moveCursor: function(state){
-    
+    return state;
   }
 
 }

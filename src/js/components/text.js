@@ -10,7 +10,6 @@ var TextView = React.createClass({
     var selection = window.getSelection();
     AppActions.setCursor(this.props.blockIndex, this.props.textIndex, selection);
 	},
-
   render: function(){
     var value = this.props.text.get('value');
     // var selectionStart = this.props.textState.get('selectionStart');

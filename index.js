@@ -27225,15 +27225,24 @@ var TextView = require('./text');
 
 var BlockView = React.createClass({displayName: "BlockView",
 
+  setCursor: function(e){
+    e.stopPropagation();
+    e.preventDefault();
+    var selection = window.getSelection();
+    var texts = this.props.block.get('texts').size;
+    var textIndex = texts > 0 ? texts - 1 : 0;
+    AppActions.setCursor(this.props.blockIndex, textIndex, selection);
+  },
+
   render: function(){
     var blockIndex = this.props.blockIndex;
     var textStates = this.props.blockState.get('texts');
     var contentTexts = this.props.block.get('texts')
     .toArray()
     // mutable array of immutables
-    .map(function(textSpan,i){
+    .map(function(text,i){
       return (
-        React.createElement(TextView, {key: i, textIndex: i, blockIndex: blockIndex, text: text, textState: textStates.get(i)})
+        React.createElement(TextView, {key: i, "data-text": i, blockIndex: blockIndex, text: text, textState: textStates.get(i)})
       )
     });
 
@@ -27242,26 +27251,26 @@ var BlockView = React.createClass({displayName: "BlockView",
 
     switch(tag) {
       case 'paragraph':
-        block = React.createElement("p", null, contentTexts)
+        block = React.createElement("p", {onClick: this.setCursor}, contentTexts)
         break;
 
       case 'header1':
-        block = React.createElement("h1", null, contentTexts)
+        block = React.createElement("h1", {onClick: this.setCursor}, contentTexts)
         break;
       case 'header2':
-        block = React.createElement("h2", null, contentTexts)
+        block = React.createElement("h2", {onClick: this.setCursor}, contentTexts)
         break;
       case 'header3':
-        block = React.createElement("h3", null, contentTexts)
+        block = React.createElement("h3", {onClick: this.setCursor}, contentTexts)
         break;
       case 'header4':
-        block = React.createElement("h4", null, contentTexts)
+        block = React.createElement("h4", {onClick: this.setCursor}, contentTexts)
         break;
       case 'header5':
-        block = React.createElement("h5", null, contentTexts)
+        block = React.createElement("h5", {onClick: this.setCursor}, contentTexts)
         break;
       case 'header6':
-        block = React.createElement("h6", null, contentTexts)
+        block = React.createElement("h6", {onClick: this.setCursor}, contentTexts)
         break;
     }
 
@@ -27287,9 +27296,36 @@ var AppActions = require('../actions/app-actions');
 
 var BlockView = require('./block');
 
+function getTextChildNode(node){
+    if (node.nodeType === 3){
+        return node;
+    } else if (node.childNodes.length){
+        for (var i = 0; i < node.childNodes.length; i++){
+            return getTextChildNode(node.childNodes[i]);
+        }
+    }
+}
+
 var DocView = React.createClass({displayName: "DocView",
   componentDidMount: function(){
-    //window.addEventListener('keydown', this.preventBrowserBackspace );
+    window.addEventListener('keydown', this.preventBrowserBackspace );
+  },
+  componentWillUnmount: function(){
+    window.removeEventListener('keydown',this.preventBrowserBackspace);
+  },
+  componentDidUpdate: function(){
+    var selection = this.props.docState.get('selection');
+    var nativeSelection = this.props.docState.get('selection').get('nativeSelection');
+    var range = document.createRange()
+    var startIndex = selection.get('startIndex');
+    var endIndex = selection.get('endIndex');
+    var baseNode = getTextChildNode(nativeSelection.baseNode);
+    var extentNode = getTextChildNode(nativeSelection.extentNode);
+    range.setStart(baseNode, startIndex);
+    range.setEnd(extentNode, endIndex);
+    
+    nativeSelection.removeAllRanges();
+    nativeSelection.addRange( range );
   },
 
 
@@ -27301,6 +27337,7 @@ var DocView = React.createClass({displayName: "DocView",
       if(!regex.test(e.target.tagName) || e.target.disabled || e.target.readOnly ){
           e.preventDefault();
           e.stopPropagation();
+          this.type(e);
       }
     }
   },
@@ -27309,16 +27346,23 @@ var DocView = React.createClass({displayName: "DocView",
     e.stopPropagation();
     e.preventDefault();
     var block = this.props.docState.get('selection').get('block');
-    var textSpan = this.props.docState.get('selection').get('textSpan');
-    var startIndex = this.props.docState.get('selection').get('startIndex');
-    var endIndex = this.props.docState.get('selection').get('endIndex');
+    var text = this.props.docState.get('selection').get('text');
+    var nativeSelection = this.props.docState.get('selection').get('nativeSelection');
+    var startIndex = nativeSelection.baseOffset;
+    var endIndex = nativeSelection.extentOffset;
 
-    AppActions.typeStuff(block, textSpan, startIndex, endIndex, e.key);
+    // delete key with a caret
+    if (e.keyCode === 8 && nativeSelection.type === 'Caret'){
+      AppActions.typeStuff(block, text, startIndex - 1, endIndex, "");
+    // anything else
+    } else {
+      AppActions.typeStuff(block, text, startIndex, endIndex, e.key);
+    }
   },
 
   render: function(){
     var self = this;
-    var blockStates = this.props.docState.get('blocks')
+    var blockStates = this.props.docState.get('blocks');
     var contentBlocks = this.props.doc.get('blocks')
     .toArray()
     // mutable array of immutables
@@ -27341,11 +27385,8 @@ var DocView = React.createClass({displayName: "DocView",
       return false;
     }
     return true;
-  },
-
-  componentWillUnmount: function(){
-    window.removeEventListener('keydown',this.preventBrowserBackspace);
   }
+
 });
 
 module.exports = DocView;
@@ -27395,7 +27436,6 @@ var TextView = React.createClass({displayName: "TextView",
     var selection = window.getSelection();
     AppActions.setCursor(this.props.blockIndex, this.props.textIndex, selection);
 	},
-
   render: function(){
     var value = this.props.text.get('value');
     // var selectionStart = this.props.textState.get('selectionStart');
@@ -27579,8 +27619,8 @@ var data = defaultData();
 var storeMethods = {
   _addText: function(data, block, text, startIndex, endIndex, char) {
     return data.updateIn(['blocks', block, 'texts', text],function(textNode){
-      var strArr = textNode.get('value').split("")
-      strArr.splice(startIndex, endIndex - startIndex, char)
+      var strArr = textNode.get('value').split("");
+      strArr.splice(startIndex, endIndex - startIndex, char);
       str = strArr.join("");
       return textNode.set('value', str);
     });
@@ -27641,8 +27681,12 @@ var defaultBlock = function(){
 
 var defaultState = function() {
   return Immutable.Map({
-    'block': null,
-    'text': null
+    'blocks': Immutable.List([ defaultBlock() ]),
+    'selection': Immutable.Map({
+      'block': null,
+      'text': null,
+      'nativeSelection': null
+    })
   });
 };
 
@@ -27652,39 +27696,28 @@ var state = defaultState();
 // Private State Methods
 var stateMethods = {
   _setCursor: function(state, block, text, selection) {
-    state = state.updateIn(['selected'],function(selected){
-
-      return selected.clear().add({
-        block: block, line: line, text: text, startIndex: startIndex, endIndex: endIndex
-      });
-    });
-    return state.updateIn(['blocks', block, 'lines', line, 'texts', text],function(textNode){
-      return textNode
-      .set('selectionStart', startIndex )
-      .set('selectionEnd', endIndex );
+    return state = state.updateIn(['selection'],function(selectionObj){
+      return selectionObj
+      .set('block',block)
+      .set('text',text)
+      .set('startIndex', selection.baseOffset)
+      .set('endIndex', selection.extentOffset)
+      .set('nativeSelection', selection);
     });
   },
 
-  _moveCursor: function(state){
-    var furthest = state.get('selected')
-    .toArray()
-    .sort(function(a,b){
-      a = a.block + "_" + a.line + "_" + a.text + "_" + a.endIndex + "_";
-      b = b.block + "_" + b.line + "_" + b.text + "_" + b.endIndex + "_";
-      return a > b ? -1 : 1;
-    });
-    furthest = furthest[furthest.length - 1];
-    var block = furthest.block, line = furthest.line, text = furthest.text,
-    startIndex = furthest.startIndex, endIndex = furthest.endIndex;
+  _setSelection: function(state, block, text, startIndex, block2, text2, endIndex, char) {
+    var range = document.createRange()
+    range.setStart(node1, start);
+    range.setEnd(node2, end);
+    var sel = window.getSelection()
+    sel.removeAllRanges();
+    sel.addRange( range );
+    return sel; 
+  },
 
-    return state.updateIn(['selected'],function(selected){
-      return selected
-      .remove(furthest)
-      .add({block: block, line: line, text: text,
-        startIndex: startIndex + 1,
-        endIndex: endIndex + 1
-      });
-    });
+  _moveCursor: function(state){
+    return state;
   }
 
 }

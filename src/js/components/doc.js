@@ -5,9 +5,36 @@ var AppActions = require('../actions/app-actions');
 
 var BlockView = require('./block');
 
+function getTextChildNode(node){
+    if (node.nodeType === 3){
+        return node;
+    } else if (node.childNodes.length){
+        for (var i = 0; i < node.childNodes.length; i++){
+            return getTextChildNode(node.childNodes[i]);
+        }
+    }
+}
+
 var DocView = React.createClass({
   componentDidMount: function(){
-    //window.addEventListener('keydown', this.preventBrowserBackspace );
+    window.addEventListener('keydown', this.preventBrowserBackspace );
+  },
+  componentWillUnmount: function(){
+    window.removeEventListener('keydown',this.preventBrowserBackspace);
+  },
+  componentDidUpdate: function(){
+    var selection = this.props.docState.get('selection');
+    var nativeSelection = this.props.docState.get('selection').get('nativeSelection');
+    var range = document.createRange()
+    var startIndex = selection.get('startIndex');
+    var endIndex = selection.get('endIndex');
+    var baseNode = getTextChildNode(nativeSelection.baseNode);
+    var extentNode = getTextChildNode(nativeSelection.extentNode);
+    range.setStart(baseNode, startIndex);
+    range.setEnd(extentNode, endIndex);
+    
+    nativeSelection.removeAllRanges();
+    nativeSelection.addRange( range );
   },
 
 
@@ -19,6 +46,7 @@ var DocView = React.createClass({
       if(!regex.test(e.target.tagName) || e.target.disabled || e.target.readOnly ){
           e.preventDefault();
           e.stopPropagation();
+          this.type(e);
       }
     }
   },
@@ -28,15 +56,22 @@ var DocView = React.createClass({
     e.preventDefault();
     var block = this.props.docState.get('selection').get('block');
     var text = this.props.docState.get('selection').get('text');
-    var startIndex = this.props.docState.get('selection').get('startIndex');
-    var endIndex = this.props.docState.get('selection').get('endIndex');
+    var nativeSelection = this.props.docState.get('selection').get('nativeSelection');
+    var startIndex = nativeSelection.baseOffset;
+    var endIndex = nativeSelection.extentOffset;
 
-    AppActions.typeStuff(block, text, startIndex, endIndex, e.key);
+    // delete key with a caret
+    if (e.keyCode === 8 && nativeSelection.type === 'Caret'){
+      AppActions.typeStuff(block, text, startIndex - 1, endIndex, "");
+    // anything else
+    } else {
+      AppActions.typeStuff(block, text, startIndex, endIndex, e.key);
+    }
   },
 
   render: function(){
     var self = this;
-    var blockStates = this.props.docState.get('blocks')
+    var blockStates = this.props.docState.get('blocks');
     var contentBlocks = this.props.doc.get('blocks')
     .toArray()
     // mutable array of immutables
@@ -59,11 +94,8 @@ var DocView = React.createClass({
       return false;
     }
     return true;
-  },
-
-  componentWillUnmount: function(){
-    window.removeEventListener('keydown',this.preventBrowserBackspace);
   }
+
 });
 
 module.exports = DocView;

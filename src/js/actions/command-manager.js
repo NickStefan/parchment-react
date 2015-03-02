@@ -23,7 +23,7 @@ var LocalCommandManager = function(AppDispatcher, io){
     this.redos = [];
     // keep local commands from getting too big
     if (this.undos.length > 100) this.undos.shift();
-
+    console.log(this.undos)
     // if (io) socket.emmit('cmd', cmd) // add user info to cmd obj
     // this.history.push(cmd)
     // console.table(this.history);

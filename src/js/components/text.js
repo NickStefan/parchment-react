@@ -13,6 +13,9 @@ var TextView = React.createClass({
   ensureTextNode: function(){
     var el = this.getDOMNode();
     if (!el.childNodes.length){
+      // 0 length character that never dirties anything
+      // hack to make empty text node selectable for contenteditable
+      // http://stackoverflow.com/questions/4063144/setting-the-caret-position-to-an-empty-node-inside-a-contenteditable-element
       el.appendChild(document.createTextNode("\uFEFF"));
     }
   },

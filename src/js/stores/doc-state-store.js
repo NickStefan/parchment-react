@@ -32,14 +32,14 @@ var state = defaultState();
 // Private State Methods
 var stateMethods = {
   _simpleInsert: function(state, selection, block1, block2, text1, text2, startIndex, endIndex, chr) {
-    selection.startIndex += 1;
-    selection.endIndex += 1;
+    selection.startIndex += chr !== undefined ? chr.length : 1;
+    selection.endIndex += chr !== undefined ? chr.length : 1;
     return state = state.set('selection',selection);
   },
 
   _simpleRemove: function(state, selection, block1, block2, text1, text2, startIndex, endIndex, chr){
-    selection.startIndex -= 1;
-    selection.endIndex -= 1;
+    selection.startIndex -= chr !== undefined ? chr.length : 1;
+    selection.endIndex -= chr !==undefined ? chr.length : 1;
     return state = state.set('selection',selection);
   },
 

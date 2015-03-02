@@ -1,8 +1,4 @@
-# React Flux Immutable (and Command Manager)
-
-Branches:
-master (uses JSX)
-no-jsx (no JSX)
+# Parchment React Flux Immutable (and Command Manager)
 
 ## Building App For Development:
 
@@ -21,10 +17,6 @@ $ python -m SimpleHTTPServer
 ```
 
 Then visit localhost:8000 in your browser.
-
-Increment with the buttons.
-Undo and redo those actions with the undo and redo buttons.
-Change the state by clicking on the number.
 
 
 ## Adding Actions To The App:

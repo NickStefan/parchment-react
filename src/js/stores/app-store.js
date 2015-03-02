@@ -42,14 +42,14 @@ AppStore.dispatchToken = AppDispatcher.register(function(payload){
   var action = payload.action;
   switch(action.type) {
 
-    // state and data changes
-    case ActionTypes.typeStuff:
-      docData = docDataMethods._addText(docData, payload.action.args);
-      docState = docStateMethods._moveCursor(docState, payload.action.args);
+    case ActionTypes.simpleInsert:
+      docData = docDataMethods._simpleInsert(docData, payload.action.args);
+      docState = docStateMethods._simpleInsert(docState, payload.action.args);
       break;
 
-    case ActionTypes.deleteStuff:
-      docData = docDataMethods._removeText(docData, payload.action.args);
+    case ActionTypes.simpleRemove:
+      docData = docDataMethods._simpleRemove(docData, payload.action.args);
+      docState = docStateMethods._simpleRemove(docState, payload.action.args);
       break;
 
     case ActionTypes.setCursor:

@@ -5544,7 +5544,7 @@ function baseAssign(object, source, customizer) {
 
 module.exports = baseAssign;
 
-},{"../object/keys":44,"./baseCopy":9}],8:[function(require,module,exports){
+},{"../object/keys":46,"./baseCopy":9}],8:[function(require,module,exports){
 var baseMatches = require('./baseMatches'),
     baseMatchesProperty = require('./baseMatchesProperty'),
     baseProperty = require('./baseProperty'),
@@ -5582,7 +5582,7 @@ function baseCallback(func, thisArg, argCount) {
 
 module.exports = baseCallback;
 
-},{"../utility/identity":50,"./baseMatches":15,"./baseMatchesProperty":16,"./baseProperty":17,"./bindCallback":21,"./isBindable":26}],9:[function(require,module,exports){
+},{"../utility/identity":52,"./baseMatches":15,"./baseMatchesProperty":16,"./baseProperty":17,"./bindCallback":22,"./isBindable":27}],9:[function(require,module,exports){
 /**
  * Copies the properties of `source` to `object`.
  *
@@ -5641,7 +5641,7 @@ function baseFor(object, iteratee, keysFunc) {
 
 module.exports = baseFor;
 
-},{"./toObject":34}],11:[function(require,module,exports){
+},{"./toObject":35}],11:[function(require,module,exports){
 var baseFor = require('./baseFor'),
     keys = require('../object/keys');
 
@@ -5660,7 +5660,7 @@ function baseForOwn(object, iteratee) {
 
 module.exports = baseForOwn;
 
-},{"../object/keys":44,"./baseFor":10}],12:[function(require,module,exports){
+},{"../object/keys":46,"./baseFor":10}],12:[function(require,module,exports){
 var baseIsEqualDeep = require('./baseIsEqualDeep');
 
 /**
@@ -5799,7 +5799,7 @@ function baseIsEqualDeep(object, other, equalFunc, customizer, isWhere, stackA, 
 
 module.exports = baseIsEqualDeep;
 
-},{"../lang/isArray":36,"../lang/isTypedArray":39,"./equalArrays":23,"./equalByTag":24,"./equalObjects":25}],14:[function(require,module,exports){
+},{"../lang/isArray":37,"../lang/isTypedArray":40,"./equalArrays":24,"./equalByTag":25,"./equalObjects":26}],14:[function(require,module,exports){
 var baseIsEqual = require('./baseIsEqual');
 
 /** Used for native method references. */
@@ -5906,7 +5906,7 @@ function baseMatches(source) {
 
 module.exports = baseMatches;
 
-},{"../object/keys":44,"./baseIsMatch":14,"./isStrictComparable":31}],16:[function(require,module,exports){
+},{"../object/keys":46,"./baseIsMatch":14,"./isStrictComparable":32}],16:[function(require,module,exports){
 var baseIsEqual = require('./baseIsEqual'),
     isStrictComparable = require('./isStrictComparable');
 
@@ -5932,7 +5932,7 @@ function baseMatchesProperty(key, value) {
 
 module.exports = baseMatchesProperty;
 
-},{"./baseIsEqual":12,"./isStrictComparable":31}],17:[function(require,module,exports){
+},{"./baseIsEqual":12,"./isStrictComparable":32}],17:[function(require,module,exports){
 /**
  * The base implementation of `_.property` which does not coerce `key` to a string.
  *
@@ -5949,6 +5949,28 @@ function baseProperty(key) {
 module.exports = baseProperty;
 
 },{}],18:[function(require,module,exports){
+/** Native method references. */
+var floor = Math.floor;
+
+/* Native method references for those with the same name as other `lodash` methods. */
+var nativeRandom = Math.random;
+
+/**
+ * The base implementation of `_.random` without support for argument juggling
+ * and returning floating-point numbers.
+ *
+ * @private
+ * @param {number} min The minimum possible value.
+ * @param {number} max The maximum possible value.
+ * @returns {number} Returns the random number.
+ */
+function baseRandom(min, max) {
+  return min + floor(nativeRandom() * (max - min + 1));
+}
+
+module.exports = baseRandom;
+
+},{}],19:[function(require,module,exports){
 var identity = require('../utility/identity'),
     metaMap = require('./metaMap');
 
@@ -5967,7 +5989,7 @@ var baseSetData = !metaMap ? identity : function(func, data) {
 
 module.exports = baseSetData;
 
-},{"../utility/identity":50,"./metaMap":32}],19:[function(require,module,exports){
+},{"../utility/identity":52,"./metaMap":33}],20:[function(require,module,exports){
 /**
  * Converts `value` to a string if it is not one. An empty string is returned
  * for `null` or `undefined` values.
@@ -5985,7 +6007,7 @@ function baseToString(value) {
 
 module.exports = baseToString;
 
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 /**
  * The base implementation of `_.values` and `_.valuesIn` which creates an
  * array of `object` property values corresponding to the property names
@@ -6009,7 +6031,7 @@ function baseValues(object, props) {
 
 module.exports = baseValues;
 
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 var identity = require('../utility/identity');
 
 /**
@@ -6050,7 +6072,7 @@ function bindCallback(func, thisArg, argCount) {
 
 module.exports = bindCallback;
 
-},{"../utility/identity":50}],22:[function(require,module,exports){
+},{"../utility/identity":52}],23:[function(require,module,exports){
 var bindCallback = require('./bindCallback'),
     isIterateeCall = require('./isIterateeCall');
 
@@ -6092,7 +6114,7 @@ function createAssigner(assigner) {
 
 module.exports = createAssigner;
 
-},{"./bindCallback":21,"./isIterateeCall":28}],23:[function(require,module,exports){
+},{"./bindCallback":22,"./isIterateeCall":29}],24:[function(require,module,exports){
 /**
  * A specialized version of `baseIsEqualDeep` for arrays with support for
  * partial deep comparisons.
@@ -6148,7 +6170,7 @@ function equalArrays(array, other, equalFunc, customizer, isWhere, stackA, stack
 
 module.exports = equalArrays;
 
-},{}],24:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 /** `Object#toString` result references. */
 var boolTag = '[object Boolean]',
     dateTag = '[object Date]',
@@ -6199,7 +6221,7 @@ function equalByTag(object, other, tag) {
 
 module.exports = equalByTag;
 
-},{}],25:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 var keys = require('../object/keys');
 
 /** Used for native method references. */
@@ -6273,7 +6295,7 @@ function equalObjects(object, other, equalFunc, customizer, isWhere, stackA, sta
 
 module.exports = equalObjects;
 
-},{"../object/keys":44}],26:[function(require,module,exports){
+},{"../object/keys":46}],27:[function(require,module,exports){
 var baseSetData = require('./baseSetData'),
     isNative = require('../lang/isNative'),
     support = require('../support');
@@ -6313,7 +6335,7 @@ function isBindable(func) {
 
 module.exports = isBindable;
 
-},{"../lang/isNative":37,"../support":49,"./baseSetData":18}],27:[function(require,module,exports){
+},{"../lang/isNative":38,"../support":51,"./baseSetData":19}],28:[function(require,module,exports){
 /**
  * Used as the maximum length of an array-like value.
  * See the [ES spec](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-number.max_safe_integer)
@@ -6337,7 +6359,7 @@ function isIndex(value, length) {
 
 module.exports = isIndex;
 
-},{}],28:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 var isIndex = require('./isIndex'),
     isLength = require('./isLength'),
     isObject = require('../lang/isObject');
@@ -6371,7 +6393,7 @@ function isIterateeCall(value, index, object) {
 
 module.exports = isIterateeCall;
 
-},{"../lang/isObject":38,"./isIndex":27,"./isLength":29}],29:[function(require,module,exports){
+},{"../lang/isObject":39,"./isIndex":28,"./isLength":30}],30:[function(require,module,exports){
 /**
  * Used as the maximum length of an array-like value.
  * See the [ES spec](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-number.max_safe_integer)
@@ -6396,7 +6418,7 @@ function isLength(value) {
 
 module.exports = isLength;
 
-},{}],30:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 /**
  * Checks if `value` is object-like.
  *
@@ -6410,7 +6432,7 @@ function isObjectLike(value) {
 
 module.exports = isObjectLike;
 
-},{}],31:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 var isObject = require('../lang/isObject');
 
 /**
@@ -6427,7 +6449,7 @@ function isStrictComparable(value) {
 
 module.exports = isStrictComparable;
 
-},{"../lang/isObject":38}],32:[function(require,module,exports){
+},{"../lang/isObject":39}],33:[function(require,module,exports){
 (function (global){
 var isNative = require('../lang/isNative');
 
@@ -6440,7 +6462,7 @@ var metaMap = WeakMap && new WeakMap;
 module.exports = metaMap;
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../lang/isNative":37}],33:[function(require,module,exports){
+},{"../lang/isNative":38}],34:[function(require,module,exports){
 var isArguments = require('../lang/isArguments'),
     isArray = require('../lang/isArray'),
     isIndex = require('./isIndex'),
@@ -6484,7 +6506,7 @@ function shimKeys(object) {
 
 module.exports = shimKeys;
 
-},{"../lang/isArguments":35,"../lang/isArray":36,"../object/keysIn":45,"../support":49,"./isIndex":27,"./isLength":29}],34:[function(require,module,exports){
+},{"../lang/isArguments":36,"../lang/isArray":37,"../object/keysIn":47,"../support":51,"./isIndex":28,"./isLength":30}],35:[function(require,module,exports){
 var isObject = require('../lang/isObject');
 
 /**
@@ -6500,7 +6522,7 @@ function toObject(value) {
 
 module.exports = toObject;
 
-},{"../lang/isObject":38}],35:[function(require,module,exports){
+},{"../lang/isObject":39}],36:[function(require,module,exports){
 var isLength = require('../internal/isLength'),
     isObjectLike = require('../internal/isObjectLike');
 
@@ -6540,7 +6562,7 @@ function isArguments(value) {
 
 module.exports = isArguments;
 
-},{"../internal/isLength":29,"../internal/isObjectLike":30}],36:[function(require,module,exports){
+},{"../internal/isLength":30,"../internal/isObjectLike":31}],37:[function(require,module,exports){
 var isLength = require('../internal/isLength'),
     isNative = require('./isNative'),
     isObjectLike = require('../internal/isObjectLike');
@@ -6583,7 +6605,7 @@ var isArray = nativeIsArray || function(value) {
 
 module.exports = isArray;
 
-},{"../internal/isLength":29,"../internal/isObjectLike":30,"./isNative":37}],37:[function(require,module,exports){
+},{"../internal/isLength":30,"../internal/isObjectLike":31,"./isNative":38}],38:[function(require,module,exports){
 var escapeRegExp = require('../string/escapeRegExp'),
     isObjectLike = require('../internal/isObjectLike');
 
@@ -6640,7 +6662,7 @@ function isNative(value) {
 
 module.exports = isNative;
 
-},{"../internal/isObjectLike":30,"../string/escapeRegExp":48}],38:[function(require,module,exports){
+},{"../internal/isObjectLike":31,"../string/escapeRegExp":50}],39:[function(require,module,exports){
 /**
  * Checks if `value` is the language type of `Object`.
  * (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
@@ -6672,7 +6694,7 @@ function isObject(value) {
 
 module.exports = isObject;
 
-},{}],39:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 var isLength = require('../internal/isLength'),
     isObjectLike = require('../internal/isObjectLike');
 
@@ -6749,7 +6771,7 @@ function isTypedArray(value) {
 
 module.exports = isTypedArray;
 
-},{"../internal/isLength":29,"../internal/isObjectLike":30}],40:[function(require,module,exports){
+},{"../internal/isLength":30,"../internal/isObjectLike":31}],41:[function(require,module,exports){
 var arrayCopy = require('../internal/arrayCopy'),
     isLength = require('../internal/isLength'),
     values = require('../object/values');
@@ -6782,7 +6804,79 @@ function toArray(value) {
 
 module.exports = toArray;
 
-},{"../internal/arrayCopy":6,"../internal/isLength":29,"../object/values":47}],41:[function(require,module,exports){
+},{"../internal/arrayCopy":6,"../internal/isLength":30,"../object/values":49}],42:[function(require,module,exports){
+var baseRandom = require('../internal/baseRandom'),
+    isIterateeCall = require('../internal/isIterateeCall');
+
+/* Native method references for those with the same name as other `lodash` methods. */
+var nativeMin = Math.min,
+    nativeRandom = Math.random;
+
+/**
+ * Produces a random number between `min` and `max` (inclusive). If only one
+ * argument is provided a number between `0` and the given number is returned.
+ * If `floating` is `true`, or either `min` or `max` are floats, a floating-point
+ * number is returned instead of an integer.
+ *
+ * @static
+ * @memberOf _
+ * @category Number
+ * @param {number} [min=0] The minimum possible value.
+ * @param {number} [max=1] The maximum possible value.
+ * @param {boolean} [floating] Specify returning a floating-point number.
+ * @returns {number} Returns the random number.
+ * @example
+ *
+ * _.random(0, 5);
+ * // => an integer between 0 and 5
+ *
+ * _.random(5);
+ * // => also an integer between 0 and 5
+ *
+ * _.random(5, true);
+ * // => a floating-point number between 0 and 5
+ *
+ * _.random(1.2, 5.2);
+ * // => a floating-point number between 1.2 and 5.2
+ */
+function random(min, max, floating) {
+  if (floating && isIterateeCall(min, max, floating)) {
+    max = floating = null;
+  }
+  var noMin = min == null,
+      noMax = max == null;
+
+  if (floating == null) {
+    if (noMax && typeof min == 'boolean') {
+      floating = min;
+      min = 1;
+    }
+    else if (typeof max == 'boolean') {
+      floating = max;
+      noMax = true;
+    }
+  }
+  if (noMin && noMax) {
+    max = 1;
+    noMax = false;
+  }
+  min = +min || 0;
+  if (noMax) {
+    max = min;
+    min = 0;
+  } else {
+    max = +max || 0;
+  }
+  if (floating || min % 1 || max % 1) {
+    var rand = nativeRandom();
+    return nativeMin(min + (rand * (max - min + parseFloat('1e-' + ((rand + '').length - 1)))), max);
+  }
+  return baseRandom(min, max);
+}
+
+module.exports = random;
+
+},{"../internal/baseRandom":18,"../internal/isIterateeCall":29}],43:[function(require,module,exports){
 var baseAssign = require('../internal/baseAssign'),
     createAssigner = require('../internal/createAssigner');
 
@@ -6819,10 +6913,10 @@ var assign = createAssigner(baseAssign);
 
 module.exports = assign;
 
-},{"../internal/baseAssign":7,"../internal/createAssigner":22}],42:[function(require,module,exports){
+},{"../internal/baseAssign":7,"../internal/createAssigner":23}],44:[function(require,module,exports){
 module.exports = require('./assign');
 
-},{"./assign":41}],43:[function(require,module,exports){
+},{"./assign":43}],45:[function(require,module,exports){
 /** Used for native method references. */
 var objectProto = Object.prototype;
 
@@ -6852,7 +6946,7 @@ function has(object, key) {
 
 module.exports = has;
 
-},{}],44:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 var isLength = require('../internal/isLength'),
     isNative = require('../lang/isNative'),
     isObject = require('../lang/isObject'),
@@ -6902,7 +6996,7 @@ var keys = !nativeKeys ? shimKeys : function(object) {
 
 module.exports = keys;
 
-},{"../internal/isLength":29,"../internal/shimKeys":33,"../lang/isNative":37,"../lang/isObject":38}],45:[function(require,module,exports){
+},{"../internal/isLength":30,"../internal/shimKeys":34,"../lang/isNative":38,"../lang/isObject":39}],47:[function(require,module,exports){
 var isArguments = require('../lang/isArguments'),
     isArray = require('../lang/isArray'),
     isIndex = require('../internal/isIndex'),
@@ -6969,7 +7063,7 @@ function keysIn(object) {
 
 module.exports = keysIn;
 
-},{"../internal/isIndex":27,"../internal/isLength":29,"../lang/isArguments":35,"../lang/isArray":36,"../lang/isObject":38,"../support":49}],46:[function(require,module,exports){
+},{"../internal/isIndex":28,"../internal/isLength":30,"../lang/isArguments":36,"../lang/isArray":37,"../lang/isObject":39,"../support":51}],48:[function(require,module,exports){
 var baseCallback = require('../internal/baseCallback'),
     baseForOwn = require('../internal/baseForOwn');
 
@@ -7026,7 +7120,7 @@ function mapValues(object, iteratee, thisArg) {
 
 module.exports = mapValues;
 
-},{"../internal/baseCallback":8,"../internal/baseForOwn":11}],47:[function(require,module,exports){
+},{"../internal/baseCallback":8,"../internal/baseForOwn":11}],49:[function(require,module,exports){
 var baseValues = require('../internal/baseValues'),
     keys = require('./keys');
 
@@ -7061,7 +7155,7 @@ function values(object) {
 
 module.exports = values;
 
-},{"../internal/baseValues":20,"./keys":44}],48:[function(require,module,exports){
+},{"../internal/baseValues":21,"./keys":46}],50:[function(require,module,exports){
 var baseToString = require('../internal/baseToString');
 
 /**
@@ -7095,7 +7189,7 @@ function escapeRegExp(string) {
 
 module.exports = escapeRegExp;
 
-},{"../internal/baseToString":19}],49:[function(require,module,exports){
+},{"../internal/baseToString":20}],51:[function(require,module,exports){
 (function (global){
 var isNative = require('./lang/isNative');
 
@@ -7174,7 +7268,7 @@ var support = {};
 module.exports = support;
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./lang/isNative":37}],50:[function(require,module,exports){
+},{"./lang/isNative":38}],52:[function(require,module,exports){
 /**
  * This method returns the first argument provided to it.
  *
@@ -7196,7 +7290,7 @@ function identity(value) {
 
 module.exports = identity;
 
-},{}],51:[function(require,module,exports){
+},{}],53:[function(require,module,exports){
 (function (global){
 /**
  * React (with addons) v0.12.2
@@ -27021,7 +27115,7 @@ module.exports = warning;
 },{"./emptyFunction":121}]},{},[1])(1)
 });
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],52:[function(require,module,exports){
+},{}],54:[function(require,module,exports){
 var _ = {
   mapValues: require('lodash/object/mapValues'),
   toArray: require('lodash/lang/toArray'),
@@ -27089,7 +27183,7 @@ var AppActions = _.mapValues(ActionTypes, function(fnName){
 module.exports = AppActions;
 
 
-},{"../actions/command-manager":53,"../constants/app-constants":59,"../dispatchers/app-dispatcher":60,"lodash/lang/toArray":40,"lodash/object/extend":42,"lodash/object/has":43,"lodash/object/mapValues":46}],53:[function(require,module,exports){
+},{"../actions/command-manager":55,"../constants/app-constants":62,"../dispatchers/app-dispatcher":63,"lodash/lang/toArray":41,"lodash/object/extend":44,"lodash/object/has":45,"lodash/object/mapValues":48}],55:[function(require,module,exports){
 
 var LocalCommandManager = function(AppDispatcher, io){
 
@@ -27168,7 +27262,7 @@ var LocalCommandManager = function(AppDispatcher, io){
 module.exports = LocalCommandManager;
 
 
-},{}],54:[function(require,module,exports){
+},{}],56:[function(require,module,exports){
 var React = require('react/dist/react-with-addons.js');
 var AppStore = require('../stores/app-store');
 
@@ -27215,34 +27309,25 @@ var APP = React.createClass({displayName: "APP",
 module.exports = APP;
 
 
-},{"../stores/app-store":62,"./doc":56,"./menu":57,"react/dist/react-with-addons.js":51}],55:[function(require,module,exports){
+},{"../stores/app-store":65,"./doc":58,"./menu":59,"react/dist/react-with-addons.js":53}],57:[function(require,module,exports){
 var React = require('react/dist/react-with-addons.js');
 var classSet = React.addons.classSet;
 
 var AppActions = require('../actions/app-actions');
-
 var TextView = require('./text');
 
 var BlockView = React.createClass({displayName: "BlockView",
-
-  setCursor: function(e){
-    e.stopPropagation();
-    e.preventDefault();
-    var selection = window.getSelection();
-    var texts = this.props.block.get('texts').size;
-    var textIndex = texts > 0 ? texts - 1 : 0;
-    AppActions.setCursor(this.props.blockIndex, textIndex, selection);
-  },
-
   render: function(){
     var blockIndex = this.props.blockIndex;
+    var docId = this.props.docId;
     var textStates = this.props.blockState.get('texts');
     var contentTexts = this.props.block.get('texts')
     .toArray()
     // mutable array of immutables
     .map(function(text,i){
       return (
-        React.createElement(TextView, {key: i, "data-text": i, blockIndex: blockIndex, text: text, textState: textStates.get(i)})
+        React.createElement(TextView, {key: i, textIndex: i, blockIndex: blockIndex, text: text, 
+        textState: textStates.get(i), docId: docId})
       )
     });
 
@@ -27251,26 +27336,26 @@ var BlockView = React.createClass({displayName: "BlockView",
 
     switch(tag) {
       case 'paragraph':
-        block = React.createElement("p", {onClick: this.setCursor}, contentTexts)
+        block = React.createElement("p", {"data-block-index": blockIndex, "data-doc-id": docId}, contentTexts)
         break;
 
       case 'header1':
-        block = React.createElement("h1", {onClick: this.setCursor}, contentTexts)
+        block = React.createElement("h1", {"data-block-index": blockIndex, "data-doc-id": docId}, contentTexts)
         break;
       case 'header2':
-        block = React.createElement("h2", {onClick: this.setCursor}, contentTexts)
+        block = React.createElement("h2", {"data-block-index": blockIndex, "data-doc-id": docId}, contentTexts)
         break;
       case 'header3':
-        block = React.createElement("h3", {onClick: this.setCursor}, contentTexts)
+        block = React.createElement("h3", {"data-block-index": blockIndex, "data-doc-id": docId}, contentTexts)
         break;
       case 'header4':
-        block = React.createElement("h4", {onClick: this.setCursor}, contentTexts)
+        block = React.createElement("h4", {"data-block-index": blockIndex, "data-doc-id": docId}, contentTexts)
         break;
       case 'header5':
-        block = React.createElement("h5", {onClick: this.setCursor}, contentTexts)
+        block = React.createElement("h5", {"data-block-index": blockIndex, "data-doc-id": docId}, contentTexts)
         break;
       case 'header6':
-        block = React.createElement("h6", {onClick: this.setCursor}, contentTexts)
+        block = React.createElement("h6", {"data-block-index": blockIndex, "data-doc-id": docId}, contentTexts)
         break;
     }
 
@@ -27288,23 +27373,13 @@ var BlockView = React.createClass({displayName: "BlockView",
 
 module.exports = BlockView;
 
-},{"../actions/app-actions":52,"./text":58,"react/dist/react-with-addons.js":51}],56:[function(require,module,exports){
+},{"../actions/app-actions":54,"./text":61,"react/dist/react-with-addons.js":53}],58:[function(require,module,exports){
 var React = require('react/dist/react-with-addons.js');
 var classSet = React.addons.classSet;
 
 var AppActions = require('../actions/app-actions');
-
 var BlockView = require('./block');
-
-function getTextChildNode(node){
-    if (node.nodeType === 3){
-        return node;
-    } else if (node.childNodes.length){
-        for (var i = 0; i < node.childNodes.length; i++){
-            return getTextChildNode(node.childNodes[i]);
-        }
-    }
-}
+var selectionUtil = require('./selection-util');
 
 var DocView = React.createClass({displayName: "DocView",
   componentDidMount: function(){
@@ -27315,15 +27390,19 @@ var DocView = React.createClass({displayName: "DocView",
   },
   componentDidUpdate: function(){
     var selection = this.props.docState.get('selection');
-    var nativeSelection = this.props.docState.get('selection').get('nativeSelection');
     var range = document.createRange()
-    var startIndex = selection.get('startIndex');
-    var endIndex = selection.get('endIndex');
-    var baseNode = getTextChildNode(nativeSelection.baseNode);
-    var extentNode = getTextChildNode(nativeSelection.extentNode);
+    var startIndex = selection.startIndex;
+    var endIndex = selection.endIndex;
+
+    // cant just use the ones in the old selection
+    // as the the text nodes may have been recreated
+    var baseNode = selectionUtil.getTextChildNode(selection.baseParentNode);
+    var extentNode = selectionUtil.getTextChildNode(selection.extentParentNode);
+
     range.setStart(baseNode, startIndex);
     range.setEnd(extentNode, endIndex);
     
+    var nativeSelection = window.getSelection();
     nativeSelection.removeAllRanges();
     nativeSelection.addRange( range );
   },
@@ -27345,35 +27424,56 @@ var DocView = React.createClass({displayName: "DocView",
   type: function(e){
     e.stopPropagation();
     e.preventDefault();
-    var block = this.props.docState.get('selection').get('block');
-    var text = this.props.docState.get('selection').get('text');
-    var nativeSelection = this.props.docState.get('selection').get('nativeSelection');
-    var startIndex = nativeSelection.baseOffset;
-    var endIndex = nativeSelection.extentOffset;
 
-    // delete key with a caret
-    if (e.keyCode === 8 && nativeSelection.type === 'Caret'){
-      AppActions.typeStuff(block, text, startIndex - 1, endIndex, "");
-    // anything else
-    } else {
-      AppActions.typeStuff(block, text, startIndex, endIndex, e.key);
+    var docId = this.props.docState.get('docId')
+
+    var selection = selectionUtil.selectionWrapper(window.getSelection());
+    var docId1 = selection.docId1;
+    var docId2 = selection.docId1;
+    var block1 = selection.block1;
+    var block2 = selection.block2;
+    var text1 = selection.text1;
+    var text2 = selection.text2;
+    var startIndex = selection.startIndex; 
+    var endIndex = selection.endIndex;
+
+    if (docId1 !== docId2 || docId1 !== docId.toString()){
+      // not this document being edited;
+      return;
     }
+
+    var simple = block1 === block1 && text1 === text2 && startIndex === endIndex;
+
+    // SIMPLE INSERT
+    if (simple && e.keyCode !== 8){
+      AppActions.simpleInsert(selection, block1, block2, text1, text2, startIndex, endIndex, e.key);
+    // SIMPLE DELETE
+    } else if (simple && e.keyCode === 8){
+      AppActions.simpleRemove(selection, block1, block2, text1, text2, startIndex, endIndex, e.key);
+    }
+  },
+
+  ensureTextNode: function(e){
+    selectionUtil.ensureTextNode(window.getSelection());
   },
 
   render: function(){
     var self = this;
+    var docId = this.props.docState.get('docId');
     var blockStates = this.props.docState.get('blocks');
     var contentBlocks = this.props.doc.get('blocks')
     .toArray()
     // mutable array of immutables
     .map(function(block,i){
       return (
-        React.createElement(BlockView, {key: i, blockIndex: i, block: block, blockState: blockStates.get(i)})
+        React.createElement(BlockView, {key: i, blockIndex: i, block: block, 
+        blockState: blockStates.get(i), 
+        docId: docId})
       )
     });
 
     return (
-      React.createElement("div", {tabIndex: -1, contentEditable: true, onKeyPress: this.type}, 
+      React.createElement("div", {onClick: this.ensureTextNode, tabIndex: -1, contentEditable: true, onKeyPress: this.type}, 
         contentBlocks 
       )
     )
@@ -27392,7 +27492,7 @@ var DocView = React.createClass({displayName: "DocView",
 module.exports = DocView;
 
 
-},{"../actions/app-actions":52,"./block":55,"react/dist/react-with-addons.js":51}],57:[function(require,module,exports){
+},{"../actions/app-actions":54,"./block":57,"./selection-util":60,"react/dist/react-with-addons.js":53}],59:[function(require,module,exports){
 var React = require('react/dist/react-with-addons.js');
 
 var AppActions = require('../actions/app-actions');
@@ -27423,33 +27523,120 @@ var MENU = React.createClass({displayName: "MENU",
 module.exports = MENU;
 
 
-},{"../actions/app-actions":52,"react/dist/react-with-addons.js":51}],58:[function(require,module,exports){
+},{"../actions/app-actions":54,"react/dist/react-with-addons.js":53}],60:[function(require,module,exports){
+module.exports = {
+  selectionWrapper: selectionWrapper,
+  getAttributes: getAttributes,
+  getTextChildNode: getTextChildNode,
+  ensureTextNode: ensureTextNode
+};
+
+function selectionWrapper(nativeSelection){
+  var selection = {};
+  selection.nativeSelection = nativeSelection;
+
+  var baseNode = nativeSelection.baseNode;
+  var extentNode = nativeSelection.extentNode;
+
+  selection.baseTextNode = getTextChildNode(baseNode);
+  selection.extentTextNode = getTextChildNode(extentNode);
+  selection.baseParentNode = selection.baseTextNode.parentElement;
+  selection.extentParentNode = selection.extentTextNode.parentElement;
+
+  var attr1 = getAttributes(selection.baseParentNode);
+  var attr2 = getAttributes(selection.extentParentNode);
+
+  selection.docId1 = attr1['doc-id'];
+  selection.docId2 = attr2['doc-id'];
+  selection.block1 = attr1['block-index'];
+  selection.block2 = attr2['block-index'];
+  selection.text1 = attr1['text-index'];
+  selection.text2 = attr2['text-index'];
+  selection.startIndex = nativeSelection.baseOffset;
+  selection.endIndex = nativeSelection.extentOffset;
+
+  return selection;
+}
+
+function getAttributes(node){
+  var attributes = {};
+  for (var i = 0; i < node.attributes.length; i++){
+    var attr = node.attributes[i];
+    attributes[ attr.name.replace(/^data-/,"") ] = attr.value;
+  }
+  return attributes;
+}
+
+function getTextChildNode(node){
+  if (node.nodeType === 3){
+      return node;
+  } else if (node.childNodes.length){
+      for (var i = 0; i < node.childNodes.length; i++){
+          return getTextChildNode(node.childNodes[i]);
+      }
+  } else {
+    node.appendChild(document.createTextNode(""));
+    return node.childNodes[0];
+  }
+}
+
+function ensureTextNode(nativeSelection){
+  var baseNode = nativeSelection.baseNode;
+  var extentNode = nativeSelection.extentNode;
+  var startIndex = nativeSelection.baseOffset;
+  var endIndex = nativeSelection.extentOffset;
+  var changed = false;
+
+  // if not a text node
+  if (baseNode.nodeType !== 3){
+    changed = true;
+    baseNode = getTextChildNode(baseNode);
+    startIndex = 0;
+  }
+  if (extentNode.nodeType !== 3){
+    changed = true;
+    extentNode = getTextChildNode(baseNode);
+    endIndex = extentNode.length;
+  }
+  // update on screen selection if anything has changed
+  if (changed){
+    var range = document.createRange();
+    range.setStart(baseNode, startIndex);
+    range.setEnd(extentNode, endIndex);
+    var selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange( range );
+  }
+}
+
+},{}],61:[function(require,module,exports){
 var React = require('react/dist/react-with-addons.js');
 var classSet = React.addons.classSet;
 
 var AppActions = require('../actions/app-actions');
 
 var TextView = React.createClass({displayName: "TextView",
-	setCursor: function(e){
-    e.stopPropagation();
-    e.preventDefault();
-    var selection = window.getSelection();
-    AppActions.setCursor(this.props.blockIndex, this.props.textIndex, selection);
-	},
+  componentDidMount: function(){
+    this.ensureTextNode();
+  },
+  componentDidUpdate: function(){
+    this.ensureTextNode();
+  },
+  ensureTextNode: function(){
+    var el = this.getDOMNode();
+    if (!el.childNodes.length){
+      el.appendChild(document.createTextNode("\uFEFF"));
+    }
+  },
   render: function(){
-    var value = this.props.text.get('value');
-    // var selectionStart = this.props.textState.get('selectionStart');
-    // var selectionEnd = this.props.textState.get('selectionEnd');
-    // var cursor;
-
-    // if (selectionStart !== null
-    // && selectionStart === selectionEnd){
-    // 	cursor = <span>|</span>
-    // }
-    //console.log(this.props.textState.toJS())
+    var value = this.props.text.get('value') || "";
+    var blockIndex = this.props.blockIndex;
+    var textIndex = this.props.textIndex;
+    var docId = this.props.docId;
 
     return (
-      React.createElement("span", {onClick: this.setCursor, className: "word-view"}, 
+      React.createElement("span", {"data-text-index": textIndex, "data-block-index": blockIndex, 
+      "data-doc-id": docId}, 
         value 
       )
     )
@@ -27466,20 +27653,20 @@ var TextView = React.createClass({displayName: "TextView",
 
 module.exports = TextView;
 
-},{"../actions/app-actions":52,"react/dist/react-with-addons.js":51}],59:[function(require,module,exports){
+},{"../actions/app-actions":54,"react/dist/react-with-addons.js":53}],62:[function(require,module,exports){
 module.exports = {
   ActionTypes: {
     undo: 'undo',
     redo: 'redo',
     
-    typeStuff: 'typeStuff',
-    deleteStuff: 'deleteStuff',
+    simpleInsert: 'simpleInsert',
+    simpleRemove: 'simpleRemove',
     setCursor: 'setCursor'
   },
 
   reverse: {
-    typeStuff: 'deleteStuff',
-    deleteStuff: 'typeStuff'
+    simpleInsert: 'simpleRemove',
+    simpleRemove: 'simpleInsert'
   },
 
   notForCommandManager: {
@@ -27488,7 +27675,7 @@ module.exports = {
 
 };
 
-},{}],60:[function(require,module,exports){
+},{}],63:[function(require,module,exports){
 var Dispatcher = require('flux').Dispatcher;
 var AppConstants = require('../constants/app-constants');
 var ActionTypes = AppConstants.ActionTypes;
@@ -27510,13 +27697,13 @@ var AppDispatcher = _.mapValues(ActionTypes,function(fnName){
 module.exports = _.extend(new Dispatcher, AppDispatcher);
 
 
-},{"../constants/app-constants":59,"flux":1,"lodash/object/extend":42,"lodash/object/mapValues":46}],61:[function(require,module,exports){
+},{"../constants/app-constants":62,"flux":1,"lodash/object/extend":44,"lodash/object/mapValues":48}],64:[function(require,module,exports){
 
 var EXAMPLE = require('./components/app');
 
 module.exports = EXAMPLE;
 
-},{"./components/app":54}],62:[function(require,module,exports){
+},{"./components/app":56}],65:[function(require,module,exports){
 var EventEmitter = require('events').EventEmitter;
 var _ = {
   extend: require('lodash/object/extend')
@@ -27561,14 +27748,14 @@ AppStore.dispatchToken = AppDispatcher.register(function(payload){
   var action = payload.action;
   switch(action.type) {
 
-    // state and data changes
-    case ActionTypes.typeStuff:
-      docData = docDataMethods._addText(docData, payload.action.args);
-      docState = docStateMethods._moveCursor(docState, payload.action.args);
+    case ActionTypes.simpleInsert:
+      docData = docDataMethods._simpleInsert(docData, payload.action.args);
+      docState = docStateMethods._simpleInsert(docState, payload.action.args);
       break;
 
-    case ActionTypes.deleteStuff:
-      docData = docDataMethods._removeText(docData, payload.action.args);
+    case ActionTypes.simpleRemove:
+      docData = docDataMethods._simpleRemove(docData, payload.action.args);
+      docState = docStateMethods._simpleRemove(docState, payload.action.args);
       break;
 
     case ActionTypes.setCursor:
@@ -27584,7 +27771,7 @@ AppStore.dispatchToken = AppDispatcher.register(function(payload){
 
 module.exports = AppStore;
 
-},{"../constants/app-constants":59,"../dispatchers/app-dispatcher":60,"../stores/doc-data-store":63,"../stores/doc-state-store":64,"events":4,"lodash/object/extend":42}],63:[function(require,module,exports){
+},{"../constants/app-constants":62,"../dispatchers/app-dispatcher":63,"../stores/doc-data-store":66,"../stores/doc-state-store":67,"events":4,"lodash/object/extend":44}],66:[function(require,module,exports){
 var Immutable = require('immutable');
 var _ = {
   mapValues: require('lodash/object/mapValues')
@@ -27595,7 +27782,7 @@ var _ = {
 
 var defaultText = function(){
   return Immutable.Map({
-    value: 'bob'
+    value: ""
   });
 }
 
@@ -27617,18 +27804,20 @@ var data = defaultData();
 /////////////////////////////
 // Private Data Methods
 var storeMethods = {
-  _addText: function(data, block, text, startIndex, endIndex, char) {
-    return data.updateIn(['blocks', block, 'texts', text],function(textNode){
+  _simpleInsert: function(data, selection, block1, block2, text1, text2, startIndex, endIndex, chr) {
+    // splice new character in at the index
+    return data.updateIn(['blocks', block1, 'texts', text1],function(textNode){
       var strArr = textNode.get('value').split("");
-      strArr.splice(startIndex, endIndex - startIndex, char);
+      strArr.splice(startIndex, endIndex - startIndex, chr);
       str = strArr.join("");
       return textNode.set('value', str);
     });
   },
-  _removeText: function(data, block, text, startIndex, endIndex, char){
-    return data.updateIn(['blocks', block, 'texts', text],function(textNode){
-      return textNode.set('value', textNode.get('value').slice(0,-1) );
-    });
+  _simpleRemove: function(data, selection, block1, block2, text1, text2, startIndex, endIndex, chr){
+    var startIndex = startIndex - 1;
+    var chr = "";
+    // essentually splice a blank character to overwrite one character back
+    return this._simpleInsert(data, selection, block1, block2, text1, text2, startIndex, endIndex, chr);
   }
 
 }
@@ -27656,20 +27845,18 @@ module.exports = {
   data: data
 };
 
-},{"immutable":5,"lodash/object/mapValues":46}],64:[function(require,module,exports){
+},{"immutable":5,"lodash/object/mapValues":48}],67:[function(require,module,exports){
 var Immutable = require('immutable');
 var _ = {
-  mapValues: require('lodash/object/mapValues')
+  mapValues: require('lodash/object/mapValues'),
+  random: require('lodash/number/random')
 };
 
 /////////////////////////////
 // State Model
 
 var defaultText = function(){
-  return Immutable.Map({
-    selectionStart: null,
-    selectionEnd: null
-  });
+  return Immutable.Map({});
 }
 
 var defaultBlock = function(){
@@ -27681,12 +27868,9 @@ var defaultBlock = function(){
 
 var defaultState = function() {
   return Immutable.Map({
+    'docId': _.random(0,1000000000),
     'blocks': Immutable.List([ defaultBlock() ]),
-    'selection': Immutable.Map({
-      'block': null,
-      'text': null,
-      'nativeSelection': null
-    })
+    'selection': null
   });
 };
 
@@ -27695,15 +27879,16 @@ var state = defaultState();
 /////////////////////////////
 // Private State Methods
 var stateMethods = {
-  _setCursor: function(state, block, text, selection) {
-    return state = state.updateIn(['selection'],function(selectionObj){
-      return selectionObj
-      .set('block',block)
-      .set('text',text)
-      .set('startIndex', selection.baseOffset)
-      .set('endIndex', selection.extentOffset)
-      .set('nativeSelection', selection);
-    });
+  _simpleInsert: function(state, selection, block1, block2, text1, text2, startIndex, endIndex, chr) {
+    selection.startIndex += 1;
+    selection.endIndex += 1;
+    return state = state.set('selection',selection);
+  },
+
+  _simpleRemove: function(state, selection, block1, block2, text1, text2, startIndex, endIndex, chr){
+    selection.startIndex -= 1;
+    selection.endIndex -= 1;
+    return state = state.set('selection',selection);
   },
 
   _setSelection: function(state, block, text, startIndex, block2, text2, endIndex, char) {
@@ -27745,4 +27930,4 @@ module.exports = {
   state: state
 }
 
-},{"immutable":5,"lodash/object/mapValues":46}]},{},[61])
+},{"immutable":5,"lodash/number/random":42,"lodash/object/mapValues":48}]},{},[64])

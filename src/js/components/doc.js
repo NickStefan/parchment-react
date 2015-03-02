@@ -2,18 +2,8 @@ var React = require('react/dist/react-with-addons.js');
 var classSet = React.addons.classSet;
 
 var AppActions = require('../actions/app-actions');
-
 var BlockView = require('./block');
-
-function getTextChildNode(node){
-    if (node.nodeType === 3){
-        return node;
-    } else if (node.childNodes.length){
-        for (var i = 0; i < node.childNodes.length; i++){
-            return getTextChildNode(node.childNodes[i]);
-        }
-    }
-}
+var selectionUtil = require('./selection-util');
 
 var DocView = React.createClass({
   componentDidMount: function(){
@@ -24,15 +14,19 @@ var DocView = React.createClass({
   },
   componentDidUpdate: function(){
     var selection = this.props.docState.get('selection');
-    var nativeSelection = this.props.docState.get('selection').get('nativeSelection');
     var range = document.createRange()
-    var startIndex = selection.get('startIndex');
-    var endIndex = selection.get('endIndex');
-    var baseNode = getTextChildNode(nativeSelection.baseNode);
-    var extentNode = getTextChildNode(nativeSelection.extentNode);
+    var startIndex = selection.startIndex;
+    var endIndex = selection.endIndex;
+
+    // cant just use the ones in the old selection
+    // as the the text nodes may have been recreated
+    var baseNode = selectionUtil.getTextChildNode(selection.baseParentNode);
+    var extentNode = selectionUtil.getTextChildNode(selection.extentParentNode);
+
     range.setStart(baseNode, startIndex);
     range.setEnd(extentNode, endIndex);
     
+    var nativeSelection = window.getSelection();
     nativeSelection.removeAllRanges();
     nativeSelection.addRange( range );
   },
@@ -54,35 +48,56 @@ var DocView = React.createClass({
   type: function(e){
     e.stopPropagation();
     e.preventDefault();
-    var block = this.props.docState.get('selection').get('block');
-    var text = this.props.docState.get('selection').get('text');
-    var nativeSelection = this.props.docState.get('selection').get('nativeSelection');
-    var startIndex = nativeSelection.baseOffset;
-    var endIndex = nativeSelection.extentOffset;
 
-    // delete key with a caret
-    if (e.keyCode === 8 && nativeSelection.type === 'Caret'){
-      AppActions.typeStuff(block, text, startIndex - 1, endIndex, "");
-    // anything else
-    } else {
-      AppActions.typeStuff(block, text, startIndex, endIndex, e.key);
+    var docId = this.props.docState.get('docId')
+
+    var selection = selectionUtil.selectionWrapper(window.getSelection());
+    var docId1 = selection.docId1;
+    var docId2 = selection.docId1;
+    var block1 = selection.block1;
+    var block2 = selection.block2;
+    var text1 = selection.text1;
+    var text2 = selection.text2;
+    var startIndex = selection.startIndex; 
+    var endIndex = selection.endIndex;
+
+    if (docId1 !== docId2 || docId1 !== docId.toString()){
+      // not this document being edited;
+      return;
     }
+
+    var simple = block1 === block1 && text1 === text2 && startIndex === endIndex;
+
+    // SIMPLE INSERT
+    if (simple && e.keyCode !== 8){
+      AppActions.simpleInsert(selection, block1, block2, text1, text2, startIndex, endIndex, e.key);
+    // SIMPLE DELETE
+    } else if (simple && e.keyCode === 8){
+      AppActions.simpleRemove(selection, block1, block2, text1, text2, startIndex, endIndex, e.key);
+    }
+  },
+
+  ensureTextNode: function(e){
+    selectionUtil.ensureTextNode(window.getSelection());
   },
 
   render: function(){
     var self = this;
+    var docId = this.props.docState.get('docId');
     var blockStates = this.props.docState.get('blocks');
     var contentBlocks = this.props.doc.get('blocks')
     .toArray()
     // mutable array of immutables
     .map(function(block,i){
       return (
-        <BlockView key={i} blockIndex={i} block={block} blockState={blockStates.get(i)}></BlockView>
+        <BlockView key={i} blockIndex={i} block={block}
+        blockState={blockStates.get(i)} 
+        docId={docId}></BlockView>
       )
     });
 
     return (
-      <div tabIndex={-1} contentEditable={true} onKeyPress={this.type}>
+      <div onClick={this.ensureTextNode} tabIndex={-1} contentEditable={true} onKeyPress={this.type}>
         { contentBlocks }
       </div>
     )

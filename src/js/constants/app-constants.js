@@ -3,14 +3,14 @@ module.exports = {
     undo: 'undo',
     redo: 'redo',
     
-    typeStuff: 'typeStuff',
-    deleteStuff: 'deleteStuff',
+    simpleInsert: 'simpleInsert',
+    simpleRemove: 'simpleRemove',
     setCursor: 'setCursor'
   },
 
   reverse: {
-    typeStuff: 'deleteStuff',
-    deleteStuff: 'typeStuff'
+    simpleInsert: 'simpleRemove',
+    simpleRemove: 'simpleInsert'
   },
 
   notForCommandManager: {

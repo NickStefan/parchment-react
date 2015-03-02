@@ -4,26 +4,27 @@ var classSet = React.addons.classSet;
 var AppActions = require('../actions/app-actions');
 
 var TextView = React.createClass({
-	setCursor: function(e){
-    e.stopPropagation();
-    e.preventDefault();
-    var selection = window.getSelection();
-    AppActions.setCursor(this.props.blockIndex, this.props.textIndex, selection);
-	},
+  componentDidMount: function(){
+    this.ensureTextNode();
+  },
+  componentDidUpdate: function(){
+    this.ensureTextNode();
+  },
+  ensureTextNode: function(){
+    var el = this.getDOMNode();
+    if (!el.childNodes.length){
+      el.appendChild(document.createTextNode("\uFEFF"));
+    }
+  },
   render: function(){
-    var value = this.props.text.get('value');
-    // var selectionStart = this.props.textState.get('selectionStart');
-    // var selectionEnd = this.props.textState.get('selectionEnd');
-    // var cursor;
-
-    // if (selectionStart !== null
-    // && selectionStart === selectionEnd){
-    // 	cursor = <span>|</span>
-    // }
-    //console.log(this.props.textState.toJS())
+    var value = this.props.text.get('value') || "";
+    var blockIndex = this.props.blockIndex;
+    var textIndex = this.props.textIndex;
+    var docId = this.props.docId;
 
     return (
-      <span onClick={this.setCursor} className="word-view">
+      <span data-text-index={textIndex} data-block-index={blockIndex} 
+      data-doc-id={docId}>
         { value }
       </span>
     )

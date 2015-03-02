@@ -1,16 +1,14 @@
 var Immutable = require('immutable');
 var _ = {
-  mapValues: require('lodash/object/mapValues')
+  mapValues: require('lodash/object/mapValues'),
+  random: require('lodash/number/random')
 };
 
 /////////////////////////////
 // State Model
 
 var defaultText = function(){
-  return Immutable.Map({
-    selectionStart: null,
-    selectionEnd: null
-  });
+  return Immutable.Map({});
 }
 
 var defaultBlock = function(){
@@ -22,12 +20,9 @@ var defaultBlock = function(){
 
 var defaultState = function() {
   return Immutable.Map({
+    'docId': _.random(0,1000000000),
     'blocks': Immutable.List([ defaultBlock() ]),
-    'selection': Immutable.Map({
-      'block': null,
-      'text': null,
-      'nativeSelection': null
-    })
+    'selection': null
   });
 };
 
@@ -36,15 +31,16 @@ var state = defaultState();
 /////////////////////////////
 // Private State Methods
 var stateMethods = {
-  _setCursor: function(state, block, text, selection) {
-    return state = state.updateIn(['selection'],function(selectionObj){
-      return selectionObj
-      .set('block',block)
-      .set('text',text)
-      .set('startIndex', selection.baseOffset)
-      .set('endIndex', selection.extentOffset)
-      .set('nativeSelection', selection);
-    });
+  _simpleInsert: function(state, selection, block1, block2, text1, text2, startIndex, endIndex, chr) {
+    selection.startIndex += 1;
+    selection.endIndex += 1;
+    return state = state.set('selection',selection);
+  },
+
+  _simpleRemove: function(state, selection, block1, block2, text1, text2, startIndex, endIndex, chr){
+    selection.startIndex -= 1;
+    selection.endIndex -= 1;
+    return state = state.set('selection',selection);
   },
 
   _setSelection: function(state, block, text, startIndex, block2, text2, endIndex, char) {

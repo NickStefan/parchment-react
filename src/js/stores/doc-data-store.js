@@ -8,7 +8,7 @@ var _ = {
 
 var defaultText = function(){
   return Immutable.Map({
-    value: 'bob'
+    value: ""
   });
 }
 
@@ -30,18 +30,20 @@ var data = defaultData();
 /////////////////////////////
 // Private Data Methods
 var storeMethods = {
-  _addText: function(data, block, text, startIndex, endIndex, char) {
-    return data.updateIn(['blocks', block, 'texts', text],function(textNode){
+  _simpleInsert: function(data, selection, block1, block2, text1, text2, startIndex, endIndex, chr) {
+    // splice new character in at the index
+    return data.updateIn(['blocks', block1, 'texts', text1],function(textNode){
       var strArr = textNode.get('value').split("");
-      strArr.splice(startIndex, endIndex - startIndex, char);
+      strArr.splice(startIndex, endIndex - startIndex, chr);
       str = strArr.join("");
       return textNode.set('value', str);
     });
   },
-  _removeText: function(data, block, text, startIndex, endIndex, char){
-    return data.updateIn(['blocks', block, 'texts', text],function(textNode){
-      return textNode.set('value', textNode.get('value').slice(0,-1) );
-    });
+  _simpleRemove: function(data, selection, block1, block2, text1, text2, startIndex, endIndex, chr){
+    var startIndex = startIndex - 1;
+    var chr = "";
+    // essentually splice a blank character to overwrite one character back
+    return this._simpleInsert(data, selection, block1, block2, text1, text2, startIndex, endIndex, chr);
   }
 
 }

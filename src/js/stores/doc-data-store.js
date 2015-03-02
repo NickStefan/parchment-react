@@ -33,10 +33,6 @@ var storeMethods = {
   _simpleInsert: function(data, selection, block1, block2, text1, text2, startIndex, endIndex, chr) {
     // splice new character in at the index
     return data.updateIn(['blocks', block1, 'texts', text1],function(textNode){
-      // // fix side effects of the 0 length character hack that makes empty text node selectable for contenteditable
-      // debugger
-      // var value = textNode.get('value').replace(/\uFEFF/,"");
-      // debugger
       var strArr = textNode.get('value').split("");
       strArr.splice(startIndex, endIndex - startIndex, chr);
       str = strArr.join("");

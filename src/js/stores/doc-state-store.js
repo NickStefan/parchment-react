@@ -41,20 +41,6 @@ var stateMethods = {
     selection.startIndex -= chr !== undefined ? chr.length : 1;
     selection.endIndex -= chr !==undefined ? chr.length : 1;
     return state = state.set('selection',selection);
-  },
-
-  _setSelection: function(state, block, text, startIndex, block2, text2, endIndex, char) {
-    var range = document.createRange()
-    range.setStart(node1, start);
-    range.setEnd(node2, end);
-    var sel = window.getSelection()
-    sel.removeAllRanges();
-    sel.addRange( range );
-    return sel; 
-  },
-
-  _moveCursor: function(state){
-    return state;
   }
 
 }

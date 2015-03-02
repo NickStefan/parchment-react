@@ -27209,7 +27209,7 @@ var LocalCommandManager = function(AppDispatcher, io){
     this.redos = [];
     // keep local commands from getting too big
     if (this.undos.length > 100) this.undos.shift();
-    console.log(this.undos)
+
     // if (io) socket.emmit('cmd', cmd) // add user info to cmd obj
     // this.history.push(cmd)
     // console.table(this.history);
@@ -27446,10 +27446,10 @@ var DocView = React.createClass({displayName: "DocView",
 
     // fix offset indexes (fix side effects of the 0 length character hack
     // that makes empty text node selectable for contenteditable)
-    if (simple && selection.nativeSelection.baseNode.length === 1 && /\uFEFF/.test(selection.nativeSelection.baseNode.nodeValue)){
-      startIndex = selection.startIndex = 0;
-      endIndex = selection.endIndex = 0;
-    }
+    // if (simple && selection.nativeSelection.baseNode.length === 1 && /\uFEFF/.test(selection.nativeSelection.baseNode.nodeValue)){
+    //   startIndex = selection.startIndex = 0;
+    //   endIndex = selection.endIndex = 0;
+    // }
 
     // SIMPLE INSERT
     if (simple && e.keyCode !== 8){
@@ -27585,7 +27585,8 @@ function getTextChildNode(node){
     // 0 length character that never dirties anything
     // hack to make empty text node selectable for contenteditable
     //http://stackoverflow.com/questions/4063144/setting-the-caret-position-to-an-empty-node-inside-a-contenteditable-element
-    node.appendChild(document.createTextNode("\uFEFF"));
+    //node.appendChild(document.createTextNode("\uFEFF"));
+    node.appendChild(document.createTextNode(""));
     return node.childNodes[0];
   }
 }
@@ -27638,7 +27639,8 @@ var TextView = React.createClass({displayName: "TextView",
       // 0 length character that never dirties anything
       // hack to make empty text node selectable for contenteditable
       // http://stackoverflow.com/questions/4063144/setting-the-caret-position-to-an-empty-node-inside-a-contenteditable-element
-      el.appendChild(document.createTextNode("\uFEFF"));
+      // el.appendChild(document.createTextNode("\uFEFF"));
+      el.appendChild(document.createTextNode(""));
     }
   },
   render: function(){
@@ -27820,10 +27822,6 @@ var storeMethods = {
   _simpleInsert: function(data, selection, block1, block2, text1, text2, startIndex, endIndex, chr) {
     // splice new character in at the index
     return data.updateIn(['blocks', block1, 'texts', text1],function(textNode){
-      // // fix side effects of the 0 length character hack that makes empty text node selectable for contenteditable
-      // debugger
-      // var value = textNode.get('value').replace(/\uFEFF/,"");
-      // debugger
       var strArr = textNode.get('value').split("");
       strArr.splice(startIndex, endIndex - startIndex, chr);
       str = strArr.join("");
@@ -27898,8 +27896,8 @@ var state = defaultState();
 // Private State Methods
 var stateMethods = {
   _simpleInsert: function(state, selection, block1, block2, text1, text2, startIndex, endIndex, chr) {
-    selection.startIndex += chr.length;
-    selection.endIndex += chr.length;
+    selection.startIndex += chr !== undefined ? chr.length : 1;
+    selection.endIndex += chr !== undefined ? chr.length : 1;
     return state = state.set('selection',selection);
   },
 
@@ -27907,20 +27905,6 @@ var stateMethods = {
     selection.startIndex -= chr !== undefined ? chr.length : 1;
     selection.endIndex -= chr !==undefined ? chr.length : 1;
     return state = state.set('selection',selection);
-  },
-
-  _setSelection: function(state, block, text, startIndex, block2, text2, endIndex, char) {
-    var range = document.createRange()
-    range.setStart(node1, start);
-    range.setEnd(node2, end);
-    var sel = window.getSelection()
-    sel.removeAllRanges();
-    sel.addRange( range );
-    return sel; 
-  },
-
-  _moveCursor: function(state){
-    return state;
   }
 
 }

@@ -70,10 +70,10 @@ var DocView = React.createClass({
 
     // fix offset indexes (fix side effects of the 0 length character hack
     // that makes empty text node selectable for contenteditable)
-    if (simple && selection.nativeSelection.baseNode.length === 1 && /\uFEFF/.test(selection.nativeSelection.baseNode.nodeValue)){
-      startIndex = selection.startIndex = 0;
-      endIndex = selection.endIndex = 0;
-    }
+    // if (simple && selection.nativeSelection.baseNode.length === 1 && /\uFEFF/.test(selection.nativeSelection.baseNode.nodeValue)){
+    //   startIndex = selection.startIndex = 0;
+    //   endIndex = selection.endIndex = 0;
+    // }
 
     // SIMPLE INSERT
     if (simple && e.keyCode !== 8){

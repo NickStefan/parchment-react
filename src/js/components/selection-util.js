@@ -52,7 +52,8 @@ function getTextChildNode(node){
     // 0 length character that never dirties anything
     // hack to make empty text node selectable for contenteditable
     //http://stackoverflow.com/questions/4063144/setting-the-caret-position-to-an-empty-node-inside-a-contenteditable-element
-    node.appendChild(document.createTextNode("\uFEFF"));
+    //node.appendChild(document.createTextNode("\uFEFF"));
+    node.appendChild(document.createTextNode(""));
     return node.childNodes[0];
   }
 }

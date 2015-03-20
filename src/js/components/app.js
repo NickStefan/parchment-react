@@ -15,8 +15,7 @@ function getDocState(){
 var APP = React.createClass({
   getInitialState: function(){
     return {
-      doc: getDoc(),
-      docState: getDocState()
+      doc: getDoc()
     };
   },
   componentWillMount: function(){

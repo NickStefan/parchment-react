@@ -44,6 +44,15 @@ AppStore.dispatchToken = AppDispatcher.register(function(payload){
 
     case ActionTypes.typing:
       docData = docDataMethods._typing(docData, payload.action.args);
+      var newStateData = {
+        startBlock: docData.get('startBlock'),
+        endBlock: docData.get('startBlock'),
+        startSpan: docData.get('startBlock'),
+        endSpan: docData.get('startBlock'),
+        startOffset: docData.get('startBlock'),
+        endOffset: docData.get('startBlock'),
+        isCollapsed: docData.get('startBlock'),
+      };
       docState = docStateMethods._setSelection(docState, payload.action.args);
       break;
 

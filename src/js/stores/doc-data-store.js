@@ -30,11 +30,11 @@ var data = defaultData();
 /////////////////////////////
 // Private Data Methods
 var storeMethods = {
-  _typing: function(data, startBlock, endBlock, startSpan, endSpan, startIndex, endIndex, chr) {
+  _typing: function(data, startBlock, endBlock, startSpan, endSpan, startIndex, endIndex, isCollapsed, chr) {
     // splice new character in at the index
-    return data.updateIn(['blocks', block1, 'texts', text1],function(textNode){
+    return data.updateIn(['blocks', startBlock, 'spans', startSpan],function(textNode){
       var strArr = textNode.get('value').split("");
-      strArr.splice(startIndex, endIndex - startIndex, chr);
+      strArr.splice(startOffset, endOffset - startOffset, chr);
       str = strArr.join("");
       return textNode.set('value', str);
     });

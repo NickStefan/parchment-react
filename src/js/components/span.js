@@ -1,50 +1,73 @@
 var React = require('react/dist/react-with-addons.js');
+var _ = {
+  last: require('lodash/array/last')
+};
 var classSet = React.addons.classSet;
 
 var AppActions = require('../actions/app-actions');
 
 var SpanView = React.createClass({
-  
-  getTxtValue: function() {
+  componentDidUpdate: function(){
+    this.setCursor();
+  },
+
+  setCursor: function() {
     // if cursor
     if (this.props.docState.get('isCollapsed') && this.props.docState.get('startSpan') === this.props.spanIndex.toString()){
-      var offset = this.props.docState.get('startOffset');
-      var value = this.props.span.get('value');
+      var span = this.getDOMNode();
+      // get the selection's exact end point, where cursor should go
+      var selection = document.getSelection();
+      var range = document.createRange();
+      range.setStart(this.getTextChildNode(span), 0);
+      range.setEnd(this.getTextChildNode(span), this.props.docState.get('endOffset'));
+      selection.removeAllRanges();
+      selection.addRange(range);
+      var selectionLines = selection.getRangeAt(0).getClientRects();
+      
+      // create or get the cursor node
+      var cursor = document.getElementsByClassName('cursor')[0];
+      if (!cursor){
+        cursor = document.createElement('SPAN');
+        document.getElementsByTagName('BODY')[0].appendChild(cursor);
+        cursor.className = 'cursor';
+        
+        // get the cursor to smoothly blink
+        setTimeout(function(){
+          if (cursor.style.visibility === 'visible'){
+            cursor.style.visibility = 'hidden';
+          } else {
+            cursor.style.visibility = 'visible';
+          }
+        },0);
+        setInterval(function(){
+          if (cursor.style.visibility === 'visible'){
+            cursor.style.visibility = 'hidden';
+          } else {
+            cursor.style.visibility = 'visible';
+          }
+        },500);
+      }
 
-      var val1 = value.slice(0, offset);
-      var val2 = value.slice(offset);
+      cursor.style.top = _.last(selectionLines).top.toString() + 'px'; 
+      cursor.style.left = _.last(selectionLines).width.toString() + 'px';
+      cursor.style.height = _.last(selectionLines).height.toString() + 'px';
 
-      if (offset === 0 && val2 === ""){
-        return [
-          <span key={0} className={'cursor'}></span>
-        ];
-      }
-      if (offset === 0 && val2 !== ""){
-        return [
-          <span key={0} className={'cursor'}></span>, 
-          <span key={1}>{val2}</span>
-        ];
-      }
-      if (0 < offset && offset < value.length){
-        return [
-          <span key={0}>{val1}</span>,
-          <span key={1} className={'cursor'}></span>,
-          <span key={2}>{val2}</span>
-        ];
-      }
-      if (offset === value.length){
-        return [
-          <span key={0}>{val1}</span>, 
-          <span key={1} className={'cursor'}></span>
-        ];
-      }
+      selection.removeAllRanges();
     }
-    // if no cursor
-    return this.props.span.get('value');
+  },
+
+  getTextChildNode: function(node){
+    if (node.nodeType === 3){
+        return node;
+    } else if (node.childNodes.length){
+        for (var i = 0; i < node.childNodes.length; i++){
+            return this.getTextChildNode(node.childNodes[i]);
+        }
+    }
   },
 
   render: function(){
-    var value = this.getTxtValue();
+    var value = this.props.span.get('value');
     var blockIndex = this.props.blockIndex;
     var spanIndex = this.props.spanIndex;
     var docId = this.props.docId;

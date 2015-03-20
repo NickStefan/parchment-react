@@ -5487,6 +5487,27 @@ function isUndefined(arg) {
 }));
 },{}],6:[function(require,module,exports){
 /**
+ * Gets the last element of `array`.
+ *
+ * @static
+ * @memberOf _
+ * @category Array
+ * @param {Array} array The array to query.
+ * @returns {*} Returns the last element of `array`.
+ * @example
+ *
+ * _.last([1, 2, 3]);
+ * // => 3
+ */
+function last(array) {
+  var length = array ? array.length : 0;
+  return length ? array[length - 1] : undefined;
+}
+
+module.exports = last;
+
+},{}],7:[function(require,module,exports){
+/**
  * Copies the values of `source` to `array`.
  *
  * @private
@@ -5507,7 +5528,7 @@ function arrayCopy(source, array) {
 
 module.exports = arrayCopy;
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 var baseCopy = require('./baseCopy'),
     keys = require('../object/keys');
 
@@ -5544,7 +5565,7 @@ function baseAssign(object, source, customizer) {
 
 module.exports = baseAssign;
 
-},{"../object/keys":46,"./baseCopy":9}],8:[function(require,module,exports){
+},{"../object/keys":47,"./baseCopy":10}],9:[function(require,module,exports){
 var baseMatches = require('./baseMatches'),
     baseMatchesProperty = require('./baseMatchesProperty'),
     baseProperty = require('./baseProperty'),
@@ -5582,7 +5603,7 @@ function baseCallback(func, thisArg, argCount) {
 
 module.exports = baseCallback;
 
-},{"../utility/identity":52,"./baseMatches":15,"./baseMatchesProperty":16,"./baseProperty":17,"./bindCallback":22,"./isBindable":27}],9:[function(require,module,exports){
+},{"../utility/identity":53,"./baseMatches":16,"./baseMatchesProperty":17,"./baseProperty":18,"./bindCallback":23,"./isBindable":28}],10:[function(require,module,exports){
 /**
  * Copies the properties of `source` to `object`.
  *
@@ -5609,7 +5630,7 @@ function baseCopy(source, object, props) {
 
 module.exports = baseCopy;
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 var toObject = require('./toObject');
 
 /**
@@ -5641,7 +5662,7 @@ function baseFor(object, iteratee, keysFunc) {
 
 module.exports = baseFor;
 
-},{"./toObject":35}],11:[function(require,module,exports){
+},{"./toObject":36}],12:[function(require,module,exports){
 var baseFor = require('./baseFor'),
     keys = require('../object/keys');
 
@@ -5660,7 +5681,7 @@ function baseForOwn(object, iteratee) {
 
 module.exports = baseForOwn;
 
-},{"../object/keys":46,"./baseFor":10}],12:[function(require,module,exports){
+},{"../object/keys":47,"./baseFor":11}],13:[function(require,module,exports){
 var baseIsEqualDeep = require('./baseIsEqualDeep');
 
 /**
@@ -5696,7 +5717,7 @@ function baseIsEqual(value, other, customizer, isWhere, stackA, stackB) {
 
 module.exports = baseIsEqual;
 
-},{"./baseIsEqualDeep":13}],13:[function(require,module,exports){
+},{"./baseIsEqualDeep":14}],14:[function(require,module,exports){
 var equalArrays = require('./equalArrays'),
     equalByTag = require('./equalByTag'),
     equalObjects = require('./equalObjects'),
@@ -5799,7 +5820,7 @@ function baseIsEqualDeep(object, other, equalFunc, customizer, isWhere, stackA, 
 
 module.exports = baseIsEqualDeep;
 
-},{"../lang/isArray":37,"../lang/isTypedArray":40,"./equalArrays":24,"./equalByTag":25,"./equalObjects":26}],14:[function(require,module,exports){
+},{"../lang/isArray":38,"../lang/isTypedArray":41,"./equalArrays":25,"./equalByTag":26,"./equalObjects":27}],15:[function(require,module,exports){
 var baseIsEqual = require('./baseIsEqual');
 
 /** Used for native method references. */
@@ -5859,7 +5880,7 @@ function baseIsMatch(object, props, values, strictCompareFlags, customizer) {
 
 module.exports = baseIsMatch;
 
-},{"./baseIsEqual":12}],15:[function(require,module,exports){
+},{"./baseIsEqual":13}],16:[function(require,module,exports){
 var baseIsMatch = require('./baseIsMatch'),
     isStrictComparable = require('./isStrictComparable'),
     keys = require('../object/keys');
@@ -5906,7 +5927,7 @@ function baseMatches(source) {
 
 module.exports = baseMatches;
 
-},{"../object/keys":46,"./baseIsMatch":14,"./isStrictComparable":32}],16:[function(require,module,exports){
+},{"../object/keys":47,"./baseIsMatch":15,"./isStrictComparable":33}],17:[function(require,module,exports){
 var baseIsEqual = require('./baseIsEqual'),
     isStrictComparable = require('./isStrictComparable');
 
@@ -5932,7 +5953,7 @@ function baseMatchesProperty(key, value) {
 
 module.exports = baseMatchesProperty;
 
-},{"./baseIsEqual":12,"./isStrictComparable":32}],17:[function(require,module,exports){
+},{"./baseIsEqual":13,"./isStrictComparable":33}],18:[function(require,module,exports){
 /**
  * The base implementation of `_.property` which does not coerce `key` to a string.
  *
@@ -5948,7 +5969,7 @@ function baseProperty(key) {
 
 module.exports = baseProperty;
 
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 /** Native method references. */
 var floor = Math.floor;
 
@@ -5970,7 +5991,7 @@ function baseRandom(min, max) {
 
 module.exports = baseRandom;
 
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 var identity = require('../utility/identity'),
     metaMap = require('./metaMap');
 
@@ -5989,7 +6010,7 @@ var baseSetData = !metaMap ? identity : function(func, data) {
 
 module.exports = baseSetData;
 
-},{"../utility/identity":52,"./metaMap":33}],20:[function(require,module,exports){
+},{"../utility/identity":53,"./metaMap":34}],21:[function(require,module,exports){
 /**
  * Converts `value` to a string if it is not one. An empty string is returned
  * for `null` or `undefined` values.
@@ -6007,7 +6028,7 @@ function baseToString(value) {
 
 module.exports = baseToString;
 
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 /**
  * The base implementation of `_.values` and `_.valuesIn` which creates an
  * array of `object` property values corresponding to the property names
@@ -6031,7 +6052,7 @@ function baseValues(object, props) {
 
 module.exports = baseValues;
 
-},{}],22:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 var identity = require('../utility/identity');
 
 /**
@@ -6072,7 +6093,7 @@ function bindCallback(func, thisArg, argCount) {
 
 module.exports = bindCallback;
 
-},{"../utility/identity":52}],23:[function(require,module,exports){
+},{"../utility/identity":53}],24:[function(require,module,exports){
 var bindCallback = require('./bindCallback'),
     isIterateeCall = require('./isIterateeCall');
 
@@ -6114,7 +6135,7 @@ function createAssigner(assigner) {
 
 module.exports = createAssigner;
 
-},{"./bindCallback":22,"./isIterateeCall":29}],24:[function(require,module,exports){
+},{"./bindCallback":23,"./isIterateeCall":30}],25:[function(require,module,exports){
 /**
  * A specialized version of `baseIsEqualDeep` for arrays with support for
  * partial deep comparisons.
@@ -6170,7 +6191,7 @@ function equalArrays(array, other, equalFunc, customizer, isWhere, stackA, stack
 
 module.exports = equalArrays;
 
-},{}],25:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 /** `Object#toString` result references. */
 var boolTag = '[object Boolean]',
     dateTag = '[object Date]',
@@ -6221,7 +6242,7 @@ function equalByTag(object, other, tag) {
 
 module.exports = equalByTag;
 
-},{}],26:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 var keys = require('../object/keys');
 
 /** Used for native method references. */
@@ -6295,7 +6316,7 @@ function equalObjects(object, other, equalFunc, customizer, isWhere, stackA, sta
 
 module.exports = equalObjects;
 
-},{"../object/keys":46}],27:[function(require,module,exports){
+},{"../object/keys":47}],28:[function(require,module,exports){
 var baseSetData = require('./baseSetData'),
     isNative = require('../lang/isNative'),
     support = require('../support');
@@ -6335,7 +6356,7 @@ function isBindable(func) {
 
 module.exports = isBindable;
 
-},{"../lang/isNative":38,"../support":51,"./baseSetData":19}],28:[function(require,module,exports){
+},{"../lang/isNative":39,"../support":52,"./baseSetData":20}],29:[function(require,module,exports){
 /**
  * Used as the maximum length of an array-like value.
  * See the [ES spec](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-number.max_safe_integer)
@@ -6359,7 +6380,7 @@ function isIndex(value, length) {
 
 module.exports = isIndex;
 
-},{}],29:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 var isIndex = require('./isIndex'),
     isLength = require('./isLength'),
     isObject = require('../lang/isObject');
@@ -6393,7 +6414,7 @@ function isIterateeCall(value, index, object) {
 
 module.exports = isIterateeCall;
 
-},{"../lang/isObject":39,"./isIndex":28,"./isLength":30}],30:[function(require,module,exports){
+},{"../lang/isObject":40,"./isIndex":29,"./isLength":31}],31:[function(require,module,exports){
 /**
  * Used as the maximum length of an array-like value.
  * See the [ES spec](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-number.max_safe_integer)
@@ -6418,7 +6439,7 @@ function isLength(value) {
 
 module.exports = isLength;
 
-},{}],31:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 /**
  * Checks if `value` is object-like.
  *
@@ -6432,7 +6453,7 @@ function isObjectLike(value) {
 
 module.exports = isObjectLike;
 
-},{}],32:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 var isObject = require('../lang/isObject');
 
 /**
@@ -6449,7 +6470,7 @@ function isStrictComparable(value) {
 
 module.exports = isStrictComparable;
 
-},{"../lang/isObject":39}],33:[function(require,module,exports){
+},{"../lang/isObject":40}],34:[function(require,module,exports){
 (function (global){
 var isNative = require('../lang/isNative');
 
@@ -6462,7 +6483,7 @@ var metaMap = WeakMap && new WeakMap;
 module.exports = metaMap;
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../lang/isNative":38}],34:[function(require,module,exports){
+},{"../lang/isNative":39}],35:[function(require,module,exports){
 var isArguments = require('../lang/isArguments'),
     isArray = require('../lang/isArray'),
     isIndex = require('./isIndex'),
@@ -6506,7 +6527,7 @@ function shimKeys(object) {
 
 module.exports = shimKeys;
 
-},{"../lang/isArguments":36,"../lang/isArray":37,"../object/keysIn":47,"../support":51,"./isIndex":28,"./isLength":30}],35:[function(require,module,exports){
+},{"../lang/isArguments":37,"../lang/isArray":38,"../object/keysIn":48,"../support":52,"./isIndex":29,"./isLength":31}],36:[function(require,module,exports){
 var isObject = require('../lang/isObject');
 
 /**
@@ -6522,7 +6543,7 @@ function toObject(value) {
 
 module.exports = toObject;
 
-},{"../lang/isObject":39}],36:[function(require,module,exports){
+},{"../lang/isObject":40}],37:[function(require,module,exports){
 var isLength = require('../internal/isLength'),
     isObjectLike = require('../internal/isObjectLike');
 
@@ -6562,7 +6583,7 @@ function isArguments(value) {
 
 module.exports = isArguments;
 
-},{"../internal/isLength":30,"../internal/isObjectLike":31}],37:[function(require,module,exports){
+},{"../internal/isLength":31,"../internal/isObjectLike":32}],38:[function(require,module,exports){
 var isLength = require('../internal/isLength'),
     isNative = require('./isNative'),
     isObjectLike = require('../internal/isObjectLike');
@@ -6605,7 +6626,7 @@ var isArray = nativeIsArray || function(value) {
 
 module.exports = isArray;
 
-},{"../internal/isLength":30,"../internal/isObjectLike":31,"./isNative":38}],38:[function(require,module,exports){
+},{"../internal/isLength":31,"../internal/isObjectLike":32,"./isNative":39}],39:[function(require,module,exports){
 var escapeRegExp = require('../string/escapeRegExp'),
     isObjectLike = require('../internal/isObjectLike');
 
@@ -6662,7 +6683,7 @@ function isNative(value) {
 
 module.exports = isNative;
 
-},{"../internal/isObjectLike":31,"../string/escapeRegExp":50}],39:[function(require,module,exports){
+},{"../internal/isObjectLike":32,"../string/escapeRegExp":51}],40:[function(require,module,exports){
 /**
  * Checks if `value` is the language type of `Object`.
  * (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
@@ -6694,7 +6715,7 @@ function isObject(value) {
 
 module.exports = isObject;
 
-},{}],40:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 var isLength = require('../internal/isLength'),
     isObjectLike = require('../internal/isObjectLike');
 
@@ -6771,7 +6792,7 @@ function isTypedArray(value) {
 
 module.exports = isTypedArray;
 
-},{"../internal/isLength":30,"../internal/isObjectLike":31}],41:[function(require,module,exports){
+},{"../internal/isLength":31,"../internal/isObjectLike":32}],42:[function(require,module,exports){
 var arrayCopy = require('../internal/arrayCopy'),
     isLength = require('../internal/isLength'),
     values = require('../object/values');
@@ -6804,7 +6825,7 @@ function toArray(value) {
 
 module.exports = toArray;
 
-},{"../internal/arrayCopy":6,"../internal/isLength":30,"../object/values":49}],42:[function(require,module,exports){
+},{"../internal/arrayCopy":7,"../internal/isLength":31,"../object/values":50}],43:[function(require,module,exports){
 var baseRandom = require('../internal/baseRandom'),
     isIterateeCall = require('../internal/isIterateeCall');
 
@@ -6876,7 +6897,7 @@ function random(min, max, floating) {
 
 module.exports = random;
 
-},{"../internal/baseRandom":18,"../internal/isIterateeCall":29}],43:[function(require,module,exports){
+},{"../internal/baseRandom":19,"../internal/isIterateeCall":30}],44:[function(require,module,exports){
 var baseAssign = require('../internal/baseAssign'),
     createAssigner = require('../internal/createAssigner');
 
@@ -6913,10 +6934,10 @@ var assign = createAssigner(baseAssign);
 
 module.exports = assign;
 
-},{"../internal/baseAssign":7,"../internal/createAssigner":23}],44:[function(require,module,exports){
+},{"../internal/baseAssign":8,"../internal/createAssigner":24}],45:[function(require,module,exports){
 module.exports = require('./assign');
 
-},{"./assign":43}],45:[function(require,module,exports){
+},{"./assign":44}],46:[function(require,module,exports){
 /** Used for native method references. */
 var objectProto = Object.prototype;
 
@@ -6946,7 +6967,7 @@ function has(object, key) {
 
 module.exports = has;
 
-},{}],46:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 var isLength = require('../internal/isLength'),
     isNative = require('../lang/isNative'),
     isObject = require('../lang/isObject'),
@@ -6996,7 +7017,7 @@ var keys = !nativeKeys ? shimKeys : function(object) {
 
 module.exports = keys;
 
-},{"../internal/isLength":30,"../internal/shimKeys":34,"../lang/isNative":38,"../lang/isObject":39}],47:[function(require,module,exports){
+},{"../internal/isLength":31,"../internal/shimKeys":35,"../lang/isNative":39,"../lang/isObject":40}],48:[function(require,module,exports){
 var isArguments = require('../lang/isArguments'),
     isArray = require('../lang/isArray'),
     isIndex = require('../internal/isIndex'),
@@ -7063,7 +7084,7 @@ function keysIn(object) {
 
 module.exports = keysIn;
 
-},{"../internal/isIndex":28,"../internal/isLength":30,"../lang/isArguments":36,"../lang/isArray":37,"../lang/isObject":39,"../support":51}],48:[function(require,module,exports){
+},{"../internal/isIndex":29,"../internal/isLength":31,"../lang/isArguments":37,"../lang/isArray":38,"../lang/isObject":40,"../support":52}],49:[function(require,module,exports){
 var baseCallback = require('../internal/baseCallback'),
     baseForOwn = require('../internal/baseForOwn');
 
@@ -7120,7 +7141,7 @@ function mapValues(object, iteratee, thisArg) {
 
 module.exports = mapValues;
 
-},{"../internal/baseCallback":8,"../internal/baseForOwn":11}],49:[function(require,module,exports){
+},{"../internal/baseCallback":9,"../internal/baseForOwn":12}],50:[function(require,module,exports){
 var baseValues = require('../internal/baseValues'),
     keys = require('./keys');
 
@@ -7155,7 +7176,7 @@ function values(object) {
 
 module.exports = values;
 
-},{"../internal/baseValues":21,"./keys":46}],50:[function(require,module,exports){
+},{"../internal/baseValues":22,"./keys":47}],51:[function(require,module,exports){
 var baseToString = require('../internal/baseToString');
 
 /**
@@ -7189,7 +7210,7 @@ function escapeRegExp(string) {
 
 module.exports = escapeRegExp;
 
-},{"../internal/baseToString":20}],51:[function(require,module,exports){
+},{"../internal/baseToString":21}],52:[function(require,module,exports){
 (function (global){
 var isNative = require('./lang/isNative');
 
@@ -7268,7 +7289,7 @@ var support = {};
 module.exports = support;
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./lang/isNative":38}],52:[function(require,module,exports){
+},{"./lang/isNative":39}],53:[function(require,module,exports){
 /**
  * This method returns the first argument provided to it.
  *
@@ -7290,7 +7311,7 @@ function identity(value) {
 
 module.exports = identity;
 
-},{}],53:[function(require,module,exports){
+},{}],54:[function(require,module,exports){
 (function (global){
 /**
  * React (with addons) v0.12.2
@@ -27115,7 +27136,7 @@ module.exports = warning;
 },{"./emptyFunction":121}]},{},[1])(1)
 });
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],54:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 var _ = {
   mapValues: require('lodash/object/mapValues'),
   toArray: require('lodash/lang/toArray'),
@@ -27183,7 +27204,7 @@ var AppActions = _.mapValues(ActionTypes, function(fnName){
 module.exports = AppActions;
 
 
-},{"../actions/command-manager":55,"../constants/app-constants":62,"../dispatchers/app-dispatcher":63,"lodash/lang/toArray":41,"lodash/object/extend":44,"lodash/object/has":45,"lodash/object/mapValues":48}],55:[function(require,module,exports){
+},{"../actions/command-manager":56,"../constants/app-constants":62,"../dispatchers/app-dispatcher":63,"lodash/lang/toArray":42,"lodash/object/extend":45,"lodash/object/has":46,"lodash/object/mapValues":49}],56:[function(require,module,exports){
 
 var LocalCommandManager = function(AppDispatcher, io){
 
@@ -27262,7 +27283,7 @@ var LocalCommandManager = function(AppDispatcher, io){
 module.exports = LocalCommandManager;
 
 
-},{}],56:[function(require,module,exports){
+},{}],57:[function(require,module,exports){
 var React = require('react/dist/react-with-addons.js');
 var AppStore = require('../stores/app-store');
 
@@ -27309,7 +27330,7 @@ var APP = React.createClass({displayName: "APP",
 module.exports = APP;
 
 
-},{"../stores/app-store":65,"./doc":58,"./menu":59,"react/dist/react-with-addons.js":53}],57:[function(require,module,exports){
+},{"../stores/app-store":65,"./doc":59,"./menu":60,"react/dist/react-with-addons.js":54}],58:[function(require,module,exports){
 var React = require('react/dist/react-with-addons.js');
 var classSet = React.addons.classSet;
 
@@ -27374,13 +27395,12 @@ var BlockView = React.createClass({displayName: "BlockView",
 
 module.exports = BlockView;
 
-},{"../actions/app-actions":54,"./span":61,"react/dist/react-with-addons.js":53}],58:[function(require,module,exports){
+},{"../actions/app-actions":55,"./span":61,"react/dist/react-with-addons.js":54}],59:[function(require,module,exports){
 var React = require('react/dist/react-with-addons.js');
 var classSet = React.addons.classSet;
 
 var AppActions = require('../actions/app-actions');
 var BlockView = require('./block');
-var selectionUtil = require('./selection-util');
 
 var DocView = React.createClass({displayName: "DocView",
   componentDidMount: function(){
@@ -27402,7 +27422,14 @@ var DocView = React.createClass({displayName: "DocView",
     }
   },
 
-  cursor: function(e){
+  clearSelection: function(e){
+    var cursor = document.getElementsByClassName('cursor')[0];
+    if (cursor){
+      document.getElementsByTagName('BODY')[0].removeChild(cursor);
+    }
+  },
+
+  setSelection: function(e){
     var selection = window.getSelection();
     if (selection.rangeCount && selection.isCollapsed){
       var isCollapsed = true;
@@ -27414,7 +27441,7 @@ var DocView = React.createClass({displayName: "DocView",
         startSpan: attr['span-index'],
         endSpan: attr['span-index']
       }
-      AppActions.setSelection(r.startBlock, r.endBlock, r.startSpan, r.endSpan, selection.baseOffset, selection.endOffset, isCollapsed);
+      AppActions.setSelection(r.startBlock, r.endBlock, r.startSpan, r.endSpan, selection.baseOffset, selection.extentOffset, isCollapsed);
     }
   },
 
@@ -27457,7 +27484,7 @@ var DocView = React.createClass({displayName: "DocView",
     });
 
     return (
-      React.createElement("div", {onMouseUp: this.cursor, tabIndex: -1, onKeyPress: this.type}, 
+      React.createElement("div", {onMouseDown: this.clearSelection, onMouseUp: this.setSelection, tabIndex: -1, onKeyPress: this.type}, 
         contentBlocks 
       )
     )
@@ -27476,7 +27503,7 @@ var DocView = React.createClass({displayName: "DocView",
 module.exports = DocView;
 
 
-},{"../actions/app-actions":54,"./block":57,"./selection-util":60,"react/dist/react-with-addons.js":53}],59:[function(require,module,exports){
+},{"../actions/app-actions":55,"./block":58,"react/dist/react-with-addons.js":54}],60:[function(require,module,exports){
 var React = require('react/dist/react-with-addons.js');
 
 var AppActions = require('../actions/app-actions');
@@ -27507,168 +27534,77 @@ var MENU = React.createClass({displayName: "MENU",
 module.exports = MENU;
 
 
-},{"../actions/app-actions":54,"react/dist/react-with-addons.js":53}],60:[function(require,module,exports){
-module.exports = {
-  getCursorIndex: getCursorIndex,
-  getRangeIndexes: getRangeIndexes
-};
-
-
-function getCursorIndex(e){
-  // get the span's block and span index
-  var span = e.target;
-  var attr = getAttributes(span);
-
-  // now get the text index:
-  var index;
-  var clickX = e.clientX;
-  var clickY = e.clientY;
-
-  // if a span wraps number lines, get an nice bounded box for each line, using a range!
-  var selection = document.getSelection();
-  var range = document.createRange();
-  range.setStart(getTextChildNode(span), 0);
-  range.setEnd(getTextChildNode(span), getTextChildNode(span).wholeText.length);
-  selection.removeAllRanges();
-  selection.addRange(range);
-  var selectionLines = selection.getRangeAt(0).getClientRects();
-
-  // get the exact row
-  var row;
-  var cumulativeRowWidth = 0;
-  for (var i = 0; i < selectionLines.length && row === undefined; i++){
-    var tempRow = selectionLines[i];
-    if (selectionLines[i].top > clickY && selectionLines[i].bottom < clickY){
-      cumulativeRowWidth = tempRow.width + cumulativeRowWidth;
-      row = tempRow;
-    }
-  }
-
-  var clickedRowPixel = clickX - row.left;
-  var cumulativeClickedWidth = clickedRowPixel + cumulativeClickedWidth - row.width;
-  var pixelRatio = cumulativeClickedWidth / cumulativeRowWidth;
-  var cursorIndex = Math.ceil(pixelRatio * getTextChildNode(span).textContent.length);
-
-  return {
-    startBlock: attr['block-index'],
-    endBlock: attr['block-index'],
-    startSpan: attr['span-index'],
-    endSpan: attr['span-index'],
-    startIndex: cursorIndex,
-    endIndex: cursorIndex
-  }
-}
-
-function getRangeIndexes(){
-  
-}
-
-function selectionWrapper(nativeSelection){
-  var selection = {};
-  selection.nativeSelection = nativeSelection;
-
-  var baseNode = nativeSelection.baseNode;
-  var extentNode = nativeSelection.extentNode;
-
-  selection.baseTextNode = getTextChildNode(baseNode);
-  selection.extentTextNode = getTextChildNode(extentNode);
-  selection.baseParentNode = selection.baseTextNode.parentElement;
-  selection.extentParentNode = selection.extentTextNode.parentElement;
-
-  var attr1 = getAttributes(selection.baseParentNode);
-  var attr2 = getAttributes(selection.extentParentNode);
-
-  selection.docId1 = attr1['doc-id'];
-  selection.docId2 = attr2['doc-id'];
-  selection.block1 = attr1['block-index'];
-  selection.block2 = attr2['block-index'];
-  selection.span1 = attr1['span-index'];
-  selection.span2 = attr2['span-index'];
-  selection.startIndex = nativeSelection.baseOffset;
-  selection.endIndex = nativeSelection.extentOffset;
-
-  return selection;
-}
-
-function getAttributes(node){
-  var attributes = {};
-  for (var i = 0; i < node.attributes.length; i++){
-    var attr = node.attributes[i];
-    attributes[ attr.name.replace(/^data-/,"") ] = attr.value;
-  }
-  return attributes;
-}
-
-function getTextChildNode(node){
-  if (node.nodeType === 3){
-      return node;
-  } else if (node.childNodes.length){
-      for (var i = 0; i < node.childNodes.length; i++){
-          return getTextChildNode(node.childNodes[i]);
-      }
-  }
-}
-
-function determineFontHeight (fontStyle){
-  var body = document.getElementsByTagName("body")[0];
-  var dummy = document.createElement("div");
-  var dummyText = document.createTextNode("M");
-  dummy.appendChild(dummyText);
-  dummy.setAttribute("style", fontStyle);
-  body.appendChild(dummy);
-  var result = dummy.offsetHeight;
-  body.removeChild(dummy);
-  return result;
-}
-
-},{}],61:[function(require,module,exports){
+},{"../actions/app-actions":55,"react/dist/react-with-addons.js":54}],61:[function(require,module,exports){
 var React = require('react/dist/react-with-addons.js');
+var _ = {
+  last: require('lodash/array/last')
+};
 var classSet = React.addons.classSet;
 
 var AppActions = require('../actions/app-actions');
 
 var SpanView = React.createClass({displayName: "SpanView",
-  
-  getTxtValue: function() {
+  componentDidUpdate: function(){
+    this.setCursor();
+  },
+
+  setCursor: function() {
     // if cursor
     if (this.props.docState.get('isCollapsed') && this.props.docState.get('startSpan') === this.props.spanIndex.toString()){
-      var offset = this.props.docState.get('startOffset');
-      var value = this.props.span.get('value');
+      var span = this.getDOMNode();
+      // get the selection's exact end point, where cursor should go
+      var selection = document.getSelection();
+      var range = document.createRange();
+      range.setStart(this.getTextChildNode(span), 0);
+      range.setEnd(this.getTextChildNode(span), this.props.docState.get('endOffset'));
+      selection.removeAllRanges();
+      selection.addRange(range);
+      var selectionLines = selection.getRangeAt(0).getClientRects();
+      
+      // create or get the cursor node
+      var cursor = document.getElementsByClassName('cursor')[0];
+      if (!cursor){
+        cursor = document.createElement('SPAN');
+        document.getElementsByTagName('BODY')[0].appendChild(cursor);
+        cursor.className = 'cursor';
+        
+        // get the cursor to smoothly blink
+        setTimeout(function(){
+          if (cursor.style.visibility === 'visible'){
+            cursor.style.visibility = 'hidden';
+          } else {
+            cursor.style.visibility = 'visible';
+          }
+        },0);
+        setInterval(function(){
+          if (cursor.style.visibility === 'visible'){
+            cursor.style.visibility = 'hidden';
+          } else {
+            cursor.style.visibility = 'visible';
+          }
+        },500);
+      }
 
-      var val1 = value.slice(0, offset);
-      var val2 = value.slice(offset);
+      cursor.style.top = _.last(selectionLines).top.toString() + 'px'; 
+      cursor.style.left = _.last(selectionLines).width.toString() + 'px';
+      cursor.style.height = _.last(selectionLines).height.toString() + 'px';
 
-      if (offset === 0 && val2 === ""){
-        return [
-          React.createElement("span", {key: 0, className: 'cursor'})
-        ];
-      }
-      if (offset === 0 && val2 !== ""){
-        return [
-          React.createElement("span", {key: 0, className: 'cursor'}), 
-          React.createElement("span", {key: 1}, val2)
-        ];
-      }
-      if (0 < offset && offset < value.length){
-        return [
-          React.createElement("span", {key: 0}, val1),
-          React.createElement("span", {key: 1, className: 'cursor'}),
-          React.createElement("span", {key: 2}, val2)
-        ];
-      }
-      if (offset === value.length){
-        return [
-          React.createElement("span", {key: 0}, val1), 
-          React.createElement("span", {key: 1, className: 'cursor'})
-        ];
-      }
+      selection.removeAllRanges();
     }
-    // if no cursor
-    return this.props.span.get('value');
+  },
+
+  getTextChildNode: function(node){
+    if (node.nodeType === 3){
+        return node;
+    } else if (node.childNodes.length){
+        for (var i = 0; i < node.childNodes.length; i++){
+            return this.getTextChildNode(node.childNodes[i]);
+        }
+    }
   },
 
   render: function(){
-    var value = this.getTxtValue();
+    var value = this.props.span.get('value');
     var blockIndex = this.props.blockIndex;
     var spanIndex = this.props.spanIndex;
     var docId = this.props.docId;
@@ -27693,7 +27629,7 @@ var SpanView = React.createClass({displayName: "SpanView",
 
 module.exports = SpanView;
 
-},{"../actions/app-actions":54,"react/dist/react-with-addons.js":53}],62:[function(require,module,exports){
+},{"../actions/app-actions":55,"lodash/array/last":6,"react/dist/react-with-addons.js":54}],62:[function(require,module,exports){
 module.exports = {
   ActionTypes: {
     undo: 'undo',
@@ -27735,13 +27671,13 @@ var AppDispatcher = _.mapValues(ActionTypes,function(fnName){
 module.exports = _.extend(new Dispatcher, AppDispatcher);
 
 
-},{"../constants/app-constants":62,"flux":1,"lodash/object/extend":44,"lodash/object/mapValues":48}],64:[function(require,module,exports){
+},{"../constants/app-constants":62,"flux":1,"lodash/object/extend":45,"lodash/object/mapValues":49}],64:[function(require,module,exports){
 
 var EXAMPLE = require('./components/app');
 
 module.exports = EXAMPLE;
 
-},{"./components/app":56}],65:[function(require,module,exports){
+},{"./components/app":57}],65:[function(require,module,exports){
 var EventEmitter = require('events').EventEmitter;
 var _ = {
   extend: require('lodash/object/extend')
@@ -27788,6 +27724,15 @@ AppStore.dispatchToken = AppDispatcher.register(function(payload){
 
     case ActionTypes.typing:
       docData = docDataMethods._typing(docData, payload.action.args);
+      var newStateData = {
+        startBlock: docData.get('startBlock'),
+        endBlock: docData.get('startBlock'),
+        startSpan: docData.get('startBlock'),
+        endSpan: docData.get('startBlock'),
+        startOffset: docData.get('startBlock'),
+        endOffset: docData.get('startBlock'),
+        isCollapsed: docData.get('startBlock'),
+      };
       docState = docStateMethods._setSelection(docState, payload.action.args);
       break;
 
@@ -27805,7 +27750,7 @@ AppStore.dispatchToken = AppDispatcher.register(function(payload){
 
 module.exports = AppStore;
 
-},{"../constants/app-constants":62,"../dispatchers/app-dispatcher":63,"../stores/doc-data-store":66,"../stores/doc-state-store":67,"events":4,"lodash/object/extend":44}],66:[function(require,module,exports){
+},{"../constants/app-constants":62,"../dispatchers/app-dispatcher":63,"../stores/doc-data-store":66,"../stores/doc-state-store":67,"events":4,"lodash/object/extend":45}],66:[function(require,module,exports){
 var Immutable = require('immutable');
 var _ = {
   mapValues: require('lodash/object/mapValues')
@@ -27838,11 +27783,11 @@ var data = defaultData();
 /////////////////////////////
 // Private Data Methods
 var storeMethods = {
-  _typing: function(data, startBlock, endBlock, startSpan, endSpan, startIndex, endIndex, chr) {
+  _typing: function(data, startBlock, endBlock, startSpan, endSpan, startIndex, endIndex, isCollapsed, chr) {
     // splice new character in at the index
-    return data.updateIn(['blocks', block1, 'texts', text1],function(textNode){
+    return data.updateIn(['blocks', startBlock, 'spans', startSpan],function(textNode){
       var strArr = textNode.get('value').split("");
-      strArr.splice(startIndex, endIndex - startIndex, chr);
+      strArr.splice(startOffset, endOffset - startOffset, chr);
       str = strArr.join("");
       return textNode.set('value', str);
     });
@@ -27873,7 +27818,7 @@ module.exports = {
   data: data
 };
 
-},{"immutable":5,"lodash/object/mapValues":48}],67:[function(require,module,exports){
+},{"immutable":5,"lodash/object/mapValues":49}],67:[function(require,module,exports){
 var Immutable = require('immutable');
 var _ = {
   mapValues: require('lodash/object/mapValues'),
@@ -27948,4 +27893,4 @@ module.exports = {
   state: state
 }
 
-},{"immutable":5,"lodash/number/random":42,"lodash/object/mapValues":48}]},{},[64])
+},{"immutable":5,"lodash/number/random":43,"lodash/object/mapValues":49}]},{},[64])

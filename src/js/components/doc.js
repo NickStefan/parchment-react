@@ -3,7 +3,6 @@ var classSet = React.addons.classSet;
 
 var AppActions = require('../actions/app-actions');
 var BlockView = require('./block');
-var selectionUtil = require('./selection-util');
 
 var DocView = React.createClass({
   componentDidMount: function(){
@@ -25,7 +24,14 @@ var DocView = React.createClass({
     }
   },
 
-  cursor: function(e){
+  clearSelection: function(e){
+    var cursor = document.getElementsByClassName('cursor')[0];
+    if (cursor){
+      document.getElementsByTagName('BODY')[0].removeChild(cursor);
+    }
+  },
+
+  setSelection: function(e){
     var selection = window.getSelection();
     if (selection.rangeCount && selection.isCollapsed){
       var isCollapsed = true;
@@ -37,7 +43,7 @@ var DocView = React.createClass({
         startSpan: attr['span-index'],
         endSpan: attr['span-index']
       }
-      AppActions.setSelection(r.startBlock, r.endBlock, r.startSpan, r.endSpan, selection.baseOffset, selection.endOffset, isCollapsed);
+      AppActions.setSelection(r.startBlock, r.endBlock, r.startSpan, r.endSpan, selection.baseOffset, selection.extentOffset, isCollapsed);
     }
   },
 
@@ -80,7 +86,7 @@ var DocView = React.createClass({
     });
 
     return (
-      <div onMouseUp={this.cursor} tabIndex={-1} onKeyPress={this.type}>
+      <div onMouseDown={this.clearSelection} onMouseUp={this.setSelection} tabIndex={-1} onKeyPress={this.type}>
         { contentBlocks }
       </div>
     )

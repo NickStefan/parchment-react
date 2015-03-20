@@ -16,8 +16,8 @@ span, div, p {
 }
 
 .cursor {
-	min-width: 1px;
-	min-height: 30px;
+	min-width: 2px;
 	display: inline-block;
 	background-color: black;
+	position: absolute;
 }

@@ -2,8 +2,18 @@ module.exports = {
   selectionWrapper: selectionWrapper,
   getAttributes: getAttributes,
   getTextChildNode: getTextChildNode,
-  ensureTextNode: ensureTextNode
+  ensureTextNode: ensureTextNode,
+  getCursorIndexes: getCursorIndexes,
+  getRangeIndexes: getRangeIndexes
 };
+
+function getCursorIndexes(){
+
+}
+
+function getRangeIndexes(){
+  
+}
 
 function selectionWrapper(nativeSelection){
   var selection = {};
@@ -24,8 +34,8 @@ function selectionWrapper(nativeSelection){
   selection.docId2 = attr2['doc-id'];
   selection.block1 = attr1['block-index'];
   selection.block2 = attr2['block-index'];
-  selection.text1 = attr1['text-index'];
-  selection.text2 = attr2['text-index'];
+  selection.span1 = attr1['span-index'];
+  selection.span2 = attr2['span-index'];
   selection.startIndex = nativeSelection.baseOffset;
   selection.endIndex = nativeSelection.extentOffset;
 

@@ -3,18 +3,16 @@ module.exports = {
     undo: 'undo',
     redo: 'redo',
     
-    simpleInsert: 'simpleInsert',
-    simpleRemove: 'simpleRemove',
-    setCursor: 'setCursor'
+    typing: 'typing',
+    setSelection: 'setSelection'
   },
 
   reverse: {
-    simpleInsert: 'simpleRemove',
-    simpleRemove: 'simpleInsert'
   },
 
   notForCommandManager: {
-    setCursor: 'setCursor'
+    typing: 'typing',
+    setSelection: 'setSelection'
   }
 
 };

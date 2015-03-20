@@ -27314,20 +27314,20 @@ var React = require('react/dist/react-with-addons.js');
 var classSet = React.addons.classSet;
 
 var AppActions = require('../actions/app-actions');
-var TextView = require('./text');
+var SpanView = require('./span');
 
 var BlockView = React.createClass({displayName: "BlockView",
   render: function(){
     var blockIndex = this.props.blockIndex;
     var docId = this.props.docId;
-    var textStates = this.props.blockState.get('texts');
-    var contentTexts = this.props.block.get('texts')
+    var spanStates = this.props.blockState.get('spans');
+    var contentSpans = this.props.block.get('spans')
     .toArray()
     // mutable array of immutables
-    .map(function(text,i){
+    .map(function(span,i){
       return (
-        React.createElement(TextView, {key: i, textIndex: i, blockIndex: blockIndex, text: text, 
-        textState: textStates.get(i), docId: docId})
+        React.createElement(SpanView, {key: i, spanIndex: i, blockIndex: blockIndex, span: span, 
+        spanState: spanStates.get(i), docId: docId})
       )
     });
 
@@ -27336,29 +27336,28 @@ var BlockView = React.createClass({displayName: "BlockView",
 
     switch(tag) {
       case 'paragraph':
-        block = React.createElement("p", {"data-block-index": blockIndex, "data-doc-id": docId}, contentTexts)
+        block = React.createElement("p", {"data-block-index": blockIndex, "data-doc-id": docId}, contentSpans)
         break;
 
       case 'header1':
-        block = React.createElement("h1", {"data-block-index": blockIndex, "data-doc-id": docId}, contentTexts)
+        block = React.createElement("h1", {"data-block-index": blockIndex, "data-doc-id": docId}, contentSpans)
         break;
       case 'header2':
-        block = React.createElement("h2", {"data-block-index": blockIndex, "data-doc-id": docId}, contentTexts)
+        block = React.createElement("h2", {"data-block-index": blockIndex, "data-doc-id": docId}, contentSpans)
         break;
       case 'header3':
-        block = React.createElement("h3", {"data-block-index": blockIndex, "data-doc-id": docId}, contentTexts)
+        block = React.createElement("h3", {"data-block-index": blockIndex, "data-doc-id": docId}, contentSpans)
         break;
       case 'header4':
-        block = React.createElement("h4", {"data-block-index": blockIndex, "data-doc-id": docId}, contentTexts)
+        block = React.createElement("h4", {"data-block-index": blockIndex, "data-doc-id": docId}, contentSpans)
         break;
       case 'header5':
-        block = React.createElement("h5", {"data-block-index": blockIndex, "data-doc-id": docId}, contentTexts)
+        block = React.createElement("h5", {"data-block-index": blockIndex, "data-doc-id": docId}, contentSpans)
         break;
       case 'header6':
-        block = React.createElement("h6", {"data-block-index": blockIndex, "data-doc-id": docId}, contentTexts)
+        block = React.createElement("h6", {"data-block-index": blockIndex, "data-doc-id": docId}, contentSpans)
         break;
     }
-
     return block;
   },
 
@@ -27373,7 +27372,7 @@ var BlockView = React.createClass({displayName: "BlockView",
 
 module.exports = BlockView;
 
-},{"../actions/app-actions":54,"./text":61,"react/dist/react-with-addons.js":53}],58:[function(require,module,exports){
+},{"../actions/app-actions":54,"./span":61,"react/dist/react-with-addons.js":53}],58:[function(require,module,exports){
 var React = require('react/dist/react-with-addons.js');
 var classSet = React.addons.classSet;
 
@@ -27389,25 +27388,8 @@ var DocView = React.createClass({displayName: "DocView",
     window.removeEventListener('keydown',this.preventBrowserBackspace);
   },
   componentDidUpdate: function(){
-    var selection = this.props.docState.get('selection');
-    var range = document.createRange()
-    var startIndex = selection.startIndex;
-    var endIndex = selection.endIndex;
 
-    // cant just use the ones in the old selection
-    // as the the text nodes may have been recreated
-    var baseNode = selectionUtil.getTextChildNode(selection.baseParentNode);
-    var extentNode = selectionUtil.getTextChildNode(selection.extentParentNode);
-
-    range.setStart(baseNode, startIndex);
-    range.setEnd(extentNode, endIndex);
-    
-    var nativeSelection = window.getSelection();
-    nativeSelection.removeAllRanges();
-    nativeSelection.addRange( range );
   },
-
-
   preventBrowserBackspace: function(e){
     // this swallows backspace keys on any non-input element.
     // prevent browser's backspace from popping browser history stack
@@ -27421,47 +27403,32 @@ var DocView = React.createClass({displayName: "DocView",
     }
   },
 
+  cursor: function(e){
+    e.stopPropagation();
+    e.preventDefault();
+
+    var range = window.getSelection();
+    if (range.rangeCount){
+      var r = selectionUtil.getRangeIndexes(range);
+      AppActions.setSelection(r.startBlock, r.endBlock, r.startSpan, r.endSpan, r.startIndex, r.endIndex);
+    
+    } else {
+      var r = selectionUtil.getCursorIndexes(e, this.props.docState.get('docId'));
+      AppActions.setSelection(r.startBlock, r.endBlock, r.startSpan, r.endSpan, r.startIndex, r.endIndex);
+    }
+  },
+
   type: function(e){
     e.stopPropagation();
     e.preventDefault();
 
-    var docId = this.props.docState.get('docId')
-
-    var selection = selectionUtil.selectionWrapper(window.getSelection());
-    var docId1 = selection.docId1;
-    var docId2 = selection.docId1;
-    var block1 = selection.block1;
-    var block2 = selection.block2;
-    var text1 = selection.text1;
-    var text2 = selection.text2;
-    var startIndex = selection.startIndex; 
-    var endIndex = selection.endIndex;
-
-    if (docId1 !== docId2 || docId1 !== docId.toString()){
-      // not this document being edited;
-      return;
-    }
-
-    var simple = block1 === block1 && text1 === text2 && startIndex === endIndex;
-
-    // fix offset indexes (fix side effects of the 0 length character hack
-    // that makes empty text node selectable for contenteditable)
-    // if (simple && selection.nativeSelection.baseNode.length === 1 && /\uFEFF/.test(selection.nativeSelection.baseNode.nodeValue)){
-    //   startIndex = selection.startIndex = 0;
-    //   endIndex = selection.endIndex = 0;
-    // }
-
     // SIMPLE INSERT
     if (simple && e.keyCode !== 8){
-      AppActions.simpleInsert(selection, block1, block2, text1, text2, startIndex, endIndex, e.key);
+      AppActions.simpleInsert(startBlock, endBlock, startSpan, endSpan, startIndex, endIndex, e.key);
     // SIMPLE DELETE
     } else if (simple && e.keyCode === 8){
-      AppActions.simpleRemove(selection, block1, block2, text1, text2, startIndex, endIndex, e.key);
+      AppActions.simpleRemove(startBlock, endBlock, startSpan, endSpan, startIndex, endIndex, e.key);
     }
-  },
-
-  ensureTextNode: function(e){
-    selectionUtil.ensureTextNode(window.getSelection());
   },
 
   render: function(){
@@ -27480,8 +27447,11 @@ var DocView = React.createClass({displayName: "DocView",
     });
 
     return (
-      React.createElement("div", {onClick: this.ensureTextNode, tabIndex: -1, contentEditable: true, onKeyPress: this.type}, 
-        contentBlocks 
+      React.createElement("div", null, 
+        React.createElement("div", {onMouseUp: this.cursor, tabIndex: -1, onKeyPress: this.type}, 
+          contentBlocks 
+        ), 
+        React.createElement("span", {className: "testSize" + docId})
       )
     )
   },
@@ -27557,8 +27527,8 @@ function selectionWrapper(nativeSelection){
   selection.docId2 = attr2['doc-id'];
   selection.block1 = attr1['block-index'];
   selection.block2 = attr2['block-index'];
-  selection.text1 = attr1['text-index'];
-  selection.text2 = attr2['text-index'];
+  selection.span1 = attr1['span-index'];
+  selection.span2 = attr2['span-index'];
   selection.startIndex = nativeSelection.baseOffset;
   selection.endIndex = nativeSelection.extentOffset;
 
@@ -27626,31 +27596,15 @@ var classSet = React.addons.classSet;
 
 var AppActions = require('../actions/app-actions');
 
-var TextView = React.createClass({displayName: "TextView",
-  componentDidMount: function(){
-    this.ensureTextNode();
-  },
-  componentDidUpdate: function(){
-    this.ensureTextNode();
-  },
-  ensureTextNode: function(){
-    var el = this.getDOMNode();
-    if (!el.childNodes.length){
-      // 0 length character that never dirties anything
-      // hack to make empty text node selectable for contenteditable
-      // http://stackoverflow.com/questions/4063144/setting-the-caret-position-to-an-empty-node-inside-a-contenteditable-element
-      // el.appendChild(document.createTextNode("\uFEFF"));
-      el.appendChild(document.createTextNode(""));
-    }
-  },
+var SpanView = React.createClass({displayName: "SpanView",
   render: function(){
-    var value = this.props.text.get('value') || "";
+    var value = this.props.span.get('value');
     var blockIndex = this.props.blockIndex;
-    var textIndex = this.props.textIndex;
+    var spanIndex = this.props.spanIndex;
     var docId = this.props.docId;
 
     return (
-      React.createElement("span", {"data-text-index": textIndex, "data-block-index": blockIndex, 
+      React.createElement("span", {"data-span-index": spanIndex, "data-block-index": blockIndex, 
       "data-doc-id": docId}, 
         value 
       )
@@ -27658,15 +27612,15 @@ var TextView = React.createClass({displayName: "TextView",
   },
 
   shouldComponentUpdate: function(nextProps,nextState){
-    if (this.props.textState === nextProps.textState &&
-        this.props.text === nextProps.text) {
+    if (this.props.spanState === nextProps.spanState &&
+        this.props.span === nextProps.span) {
       return false;
     }
     return true;
   }
 });
 
-module.exports = TextView;
+module.exports = SpanView;
 
 },{"../actions/app-actions":54,"react/dist/react-with-addons.js":53}],62:[function(require,module,exports){
 module.exports = {
@@ -27674,18 +27628,16 @@ module.exports = {
     undo: 'undo',
     redo: 'redo',
     
-    simpleInsert: 'simpleInsert',
-    simpleRemove: 'simpleRemove',
-    setCursor: 'setCursor'
+    typing: 'typing',
+    setSelection: 'setSelection'
   },
 
   reverse: {
-    simpleInsert: 'simpleRemove',
-    simpleRemove: 'simpleInsert'
   },
 
   notForCommandManager: {
-    setCursor: 'setCursor'
+    typing: 'typing',
+    setSelection: 'setSelection'
   }
 
 };
@@ -27763,18 +27715,13 @@ AppStore.dispatchToken = AppDispatcher.register(function(payload){
   var action = payload.action;
   switch(action.type) {
 
-    case ActionTypes.simpleInsert:
-      docData = docDataMethods._simpleInsert(docData, payload.action.args);
-      docState = docStateMethods._simpleInsert(docState, payload.action.args);
+    case ActionTypes.typing:
+      docData = docDataMethods._typing(docData, payload.action.args);
+      docState = docStateMethods._setSelection(docState, payload.action.args);
       break;
 
-    case ActionTypes.simpleRemove:
-      docData = docDataMethods._simpleRemove(docData, payload.action.args);
-      docState = docStateMethods._simpleRemove(docState, payload.action.args);
-      break;
-
-    case ActionTypes.setCursor:
-      docState = docStateMethods._setCursor(docState, payload.action.args);
+    case ActionTypes.setSelection:
+      docState = docStateMethods._setSelection(docState, payload.action.args);
       break;
     
     default:
@@ -27795,16 +27742,16 @@ var _ = {
 /////////////////////////////
 // Data Model
 
-var defaultText = function(){
+var defaultSpan = function(){
   return Immutable.Map({
-    value: ""
+    value: "bob is a cat."
   });
 }
 
 var defaultBlock = function(){
   return Immutable.Map({
     type: 'paragraph',
-    texts: Immutable.List([ defaultText() ])
+    spans: Immutable.List([ defaultSpan() ])
   });
 }
 
@@ -27819,7 +27766,7 @@ var data = defaultData();
 /////////////////////////////
 // Private Data Methods
 var storeMethods = {
-  _simpleInsert: function(data, selection, block1, block2, text1, text2, startIndex, endIndex, chr) {
+  _typing: function(data, startBlock, endBlock, startSpan, endSpan, startIndex, endIndex, chr) {
     // splice new character in at the index
     return data.updateIn(['blocks', block1, 'texts', text1],function(textNode){
       var strArr = textNode.get('value').split("");
@@ -27827,13 +27774,6 @@ var storeMethods = {
       str = strArr.join("");
       return textNode.set('value', str);
     });
-  },
-  _simpleRemove: function(data, selection, block1, block2, text1, text2, startIndex, endIndex, chr){
-    var startIndex = startIndex - 1;
-    //var chr = chr !== undefined ? chr : "";
-    var chr = "";
-    // essentually splice a blank character to overwrite one character back
-    return this._simpleInsert(data, selection, block1, block2, text1, text2, startIndex, endIndex, chr);
   }
 
 }
@@ -27871,14 +27811,14 @@ var _ = {
 /////////////////////////////
 // State Model
 
-var defaultText = function(){
+var defaultSpan = function(){
   return Immutable.Map({});
 }
 
 var defaultBlock = function(){
   return Immutable.Map({
     type: 'paragraph',
-    texts: Immutable.List([ defaultText() ])
+    spans: Immutable.List([ defaultSpan() ])
   });
 }
 
@@ -27886,7 +27826,12 @@ var defaultState = function() {
   return Immutable.Map({
     'docId': _.random(0,1000000000),
     'blocks': Immutable.List([ defaultBlock() ]),
-    'selection': null
+    'startBlock': null,
+    'endBlock': null,
+    'startSpan': null,
+    'endSpan': null,
+    'startIndex': null,
+    'endIndex': null
   });
 };
 
@@ -27895,18 +27840,15 @@ var state = defaultState();
 /////////////////////////////
 // Private State Methods
 var stateMethods = {
-  _simpleInsert: function(state, selection, block1, block2, text1, text2, startIndex, endIndex, chr) {
-    selection.startIndex += chr !== undefined ? chr.length : 1;
-    selection.endIndex += chr !== undefined ? chr.length : 1;
-    return state = state.set('selection',selection);
-  },
-
-  _simpleRemove: function(state, selection, block1, block2, text1, text2, startIndex, endIndex, chr){
-    selection.startIndex -= chr !== undefined ? chr.length : 1;
-    selection.endIndex -= chr !==undefined ? chr.length : 1;
-    return state = state.set('selection',selection);
+  _setSelection: function(state, startBlock, endBlock, startSpan, endSpan, startIndex, endIndex, chr){
+    return state = state
+    .set('startBlock', startBlock)
+    .set('endBlock', endBlock)
+    .set('startSpan', startSpan)
+    .set('endSpan', endSpan)
+    .set('startIndex', startIndex)
+    .set('endIndex', endIndex);
   }
-
 }
 
 // map the invoked arguments to the expected arguments defined above.

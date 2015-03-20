@@ -13,25 +13,8 @@ var DocView = React.createClass({
     window.removeEventListener('keydown',this.preventBrowserBackspace);
   },
   componentDidUpdate: function(){
-    var selection = this.props.docState.get('selection');
-    var range = document.createRange()
-    var startIndex = selection.startIndex;
-    var endIndex = selection.endIndex;
 
-    // cant just use the ones in the old selection
-    // as the the text nodes may have been recreated
-    var baseNode = selectionUtil.getTextChildNode(selection.baseParentNode);
-    var extentNode = selectionUtil.getTextChildNode(selection.extentParentNode);
-
-    range.setStart(baseNode, startIndex);
-    range.setEnd(extentNode, endIndex);
-    
-    var nativeSelection = window.getSelection();
-    nativeSelection.removeAllRanges();
-    nativeSelection.addRange( range );
   },
-
-
   preventBrowserBackspace: function(e){
     // this swallows backspace keys on any non-input element.
     // prevent browser's backspace from popping browser history stack
@@ -45,47 +28,32 @@ var DocView = React.createClass({
     }
   },
 
+  cursor: function(e){
+    e.stopPropagation();
+    e.preventDefault();
+
+    var range = window.getSelection();
+    if (range.rangeCount){
+      var r = selectionUtil.getRangeIndexes(range);
+      AppActions.setSelection(r.startBlock, r.endBlock, r.startSpan, r.endSpan, r.startIndex, r.endIndex);
+    
+    } else {
+      var r = selectionUtil.getCursorIndexes(e, this.props.docState.get('docId'));
+      AppActions.setSelection(r.startBlock, r.endBlock, r.startSpan, r.endSpan, r.startIndex, r.endIndex);
+    }
+  },
+
   type: function(e){
     e.stopPropagation();
     e.preventDefault();
 
-    var docId = this.props.docState.get('docId')
-
-    var selection = selectionUtil.selectionWrapper(window.getSelection());
-    var docId1 = selection.docId1;
-    var docId2 = selection.docId1;
-    var block1 = selection.block1;
-    var block2 = selection.block2;
-    var text1 = selection.text1;
-    var text2 = selection.text2;
-    var startIndex = selection.startIndex; 
-    var endIndex = selection.endIndex;
-
-    if (docId1 !== docId2 || docId1 !== docId.toString()){
-      // not this document being edited;
-      return;
-    }
-
-    var simple = block1 === block1 && text1 === text2 && startIndex === endIndex;
-
-    // fix offset indexes (fix side effects of the 0 length character hack
-    // that makes empty text node selectable for contenteditable)
-    // if (simple && selection.nativeSelection.baseNode.length === 1 && /\uFEFF/.test(selection.nativeSelection.baseNode.nodeValue)){
-    //   startIndex = selection.startIndex = 0;
-    //   endIndex = selection.endIndex = 0;
-    // }
-
     // SIMPLE INSERT
     if (simple && e.keyCode !== 8){
-      AppActions.simpleInsert(selection, block1, block2, text1, text2, startIndex, endIndex, e.key);
+      AppActions.simpleInsert(startBlock, endBlock, startSpan, endSpan, startIndex, endIndex, e.key);
     // SIMPLE DELETE
     } else if (simple && e.keyCode === 8){
-      AppActions.simpleRemove(selection, block1, block2, text1, text2, startIndex, endIndex, e.key);
+      AppActions.simpleRemove(startBlock, endBlock, startSpan, endSpan, startIndex, endIndex, e.key);
     }
-  },
-
-  ensureTextNode: function(e){
-    selectionUtil.ensureTextNode(window.getSelection());
   },
 
   render: function(){
@@ -104,8 +72,11 @@ var DocView = React.createClass({
     });
 
     return (
-      <div onClick={this.ensureTextNode} tabIndex={-1} contentEditable={true} onKeyPress={this.type}>
-        { contentBlocks }
+      <div>
+        <div onMouseUp={this.cursor} tabIndex={-1} onKeyPress={this.type}>
+          { contentBlocks }
+        </div>
+        <span className={"testSize" + docId}></span>
       </div>
     )
   },

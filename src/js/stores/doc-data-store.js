@@ -6,16 +6,16 @@ var _ = {
 /////////////////////////////
 // Data Model
 
-var defaultText = function(){
+var defaultSpan = function(){
   return Immutable.Map({
-    value: ""
+    value: "bob is a cat."
   });
 }
 
 var defaultBlock = function(){
   return Immutable.Map({
     type: 'paragraph',
-    texts: Immutable.List([ defaultText() ])
+    spans: Immutable.List([ defaultSpan() ])
   });
 }
 
@@ -30,7 +30,7 @@ var data = defaultData();
 /////////////////////////////
 // Private Data Methods
 var storeMethods = {
-  _simpleInsert: function(data, selection, block1, block2, text1, text2, startIndex, endIndex, chr) {
+  _typing: function(data, startBlock, endBlock, startSpan, endSpan, startIndex, endIndex, chr) {
     // splice new character in at the index
     return data.updateIn(['blocks', block1, 'texts', text1],function(textNode){
       var strArr = textNode.get('value').split("");
@@ -38,13 +38,6 @@ var storeMethods = {
       str = strArr.join("");
       return textNode.set('value', str);
     });
-  },
-  _simpleRemove: function(data, selection, block1, block2, text1, text2, startIndex, endIndex, chr){
-    var startIndex = startIndex - 1;
-    //var chr = chr !== undefined ? chr : "";
-    var chr = "";
-    // essentually splice a blank character to overwrite one character back
-    return this._simpleInsert(data, selection, block1, block2, text1, text2, startIndex, endIndex, chr);
   }
 
 }

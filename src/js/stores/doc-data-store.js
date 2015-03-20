@@ -8,7 +8,7 @@ var _ = {
 
 var defaultSpan = function(){
   return Immutable.Map({
-    value: "bob is a cat."
+    value: "bob is a cat. he has a hat. he hated cats. this is the end of the story."
   });
 }
 

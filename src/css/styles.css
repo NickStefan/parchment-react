@@ -14,3 +14,10 @@ span, div, p {
 	-moz-box-shadow: none;
 	box-shadow: none;
 }
+
+.cursor {
+	min-width: 1px;
+	min-height: 30px;
+	display: inline-block;
+	background-color: black;
+}

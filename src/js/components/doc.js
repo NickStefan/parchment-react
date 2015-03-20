@@ -12,9 +12,6 @@ var DocView = React.createClass({
   componentWillUnmount: function(){
     window.removeEventListener('keydown',this.preventBrowserBackspace);
   },
-  componentDidUpdate: function(){
-
-  },
   preventBrowserBackspace: function(e){
     // this swallows backspace keys on any non-input element.
     // prevent browser's backspace from popping browser history stack
@@ -29,18 +26,28 @@ var DocView = React.createClass({
   },
 
   cursor: function(e){
-    e.stopPropagation();
-    e.preventDefault();
-
-    var range = window.getSelection();
-    if (range.rangeCount){
-      var r = selectionUtil.getRangeIndexes(range);
-      AppActions.setSelection(r.startBlock, r.endBlock, r.startSpan, r.endSpan, r.startIndex, r.endIndex);
-    
-    } else {
-      var r = selectionUtil.getCursorIndexes(e, this.props.docState.get('docId'));
-      AppActions.setSelection(r.startBlock, r.endBlock, r.startSpan, r.endSpan, r.startIndex, r.endIndex);
+    var selection = window.getSelection();
+    if (selection.rangeCount && selection.isCollapsed){
+      var isCollapsed = true;
+      var span = e.target;
+      var attr = this.getAttributes(span);
+      var r = {
+        startBlock: attr['block-index'],
+        endBlock: attr['block-index'],
+        startSpan: attr['span-index'],
+        endSpan: attr['span-index']
+      }
+      AppActions.setSelection(r.startBlock, r.endBlock, r.startSpan, r.endSpan, selection.baseOffset, selection.endOffset, isCollapsed);
     }
+  },
+
+  getAttributes: function(node){
+    var attributes = {};
+    for (var i = 0; i < node.attributes.length; i++){
+      var attr = node.attributes[i];
+      attributes[ attr.name.replace(/^data-/,"") ] = attr.value;
+    }
+      return attributes;
   },
 
   type: function(e){
@@ -58,6 +65,7 @@ var DocView = React.createClass({
 
   render: function(){
     var self = this;
+    var docState = this.props.docState;
     var docId = this.props.docState.get('docId');
     var blockStates = this.props.docState.get('blocks');
     var contentBlocks = this.props.doc.get('blocks')
@@ -66,17 +74,14 @@ var DocView = React.createClass({
     .map(function(block,i){
       return (
         <BlockView key={i} blockIndex={i} block={block}
-        blockState={blockStates.get(i)} 
+        blockState={blockStates.get(i)} docState={docState}
         docId={docId}></BlockView>
       )
     });
 
     return (
-      <div>
-        <div onMouseUp={this.cursor} tabIndex={-1} onKeyPress={this.type}>
-          { contentBlocks }
-        </div>
-        <span className={"testSize" + docId}></span>
+      <div onMouseUp={this.cursor} tabIndex={-1} onKeyPress={this.type}>
+        { contentBlocks }
       </div>
     )
   },

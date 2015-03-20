@@ -20,14 +20,15 @@ var defaultBlock = function(){
 
 var defaultState = function() {
   return Immutable.Map({
-    'docId': _.random(0,1000000000),
+    'docId': _.random(0,1000000000).toString(),
     'blocks': Immutable.List([ defaultBlock() ]),
     'startBlock': null,
     'endBlock': null,
     'startSpan': null,
     'endSpan': null,
-    'startIndex': null,
-    'endIndex': null
+    'startOffset': null,
+    'endOffset': null,
+    'isCollapsed': null
   });
 };
 
@@ -36,14 +37,15 @@ var state = defaultState();
 /////////////////////////////
 // Private State Methods
 var stateMethods = {
-  _setSelection: function(state, startBlock, endBlock, startSpan, endSpan, startIndex, endIndex, chr){
-    return state = state
+  _setSelection: function(state, startBlock, endBlock, startSpan, endSpan, startOffset, endOffset, isCollapsed){
+    return state
     .set('startBlock', startBlock)
     .set('endBlock', endBlock)
     .set('startSpan', startSpan)
     .set('endSpan', endSpan)
-    .set('startIndex', startIndex)
-    .set('endIndex', endIndex);
+    .set('startOffset', startOffset)
+    .set('endOffset', endOffset)
+    .set('isCollapsed', isCollapsed);
   }
 }
 

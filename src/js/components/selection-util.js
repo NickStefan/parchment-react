@@ -1,14 +1,52 @@
 module.exports = {
-  selectionWrapper: selectionWrapper,
-  getAttributes: getAttributes,
-  getTextChildNode: getTextChildNode,
-  ensureTextNode: ensureTextNode,
-  getCursorIndexes: getCursorIndexes,
+  getCursorIndex: getCursorIndex,
   getRangeIndexes: getRangeIndexes
 };
 
-function getCursorIndexes(){
 
+function getCursorIndex(e){
+  // get the span's block and span index
+  var span = e.target;
+  var attr = getAttributes(span);
+
+  // now get the text index:
+  var index;
+  var clickX = e.clientX;
+  var clickY = e.clientY;
+
+  // if a span wraps number lines, get an nice bounded box for each line, using a range!
+  var selection = document.getSelection();
+  var range = document.createRange();
+  range.setStart(getTextChildNode(span), 0);
+  range.setEnd(getTextChildNode(span), getTextChildNode(span).wholeText.length);
+  selection.removeAllRanges();
+  selection.addRange(range);
+  var selectionLines = selection.getRangeAt(0).getClientRects();
+
+  // get the exact row
+  var row;
+  var cumulativeRowWidth = 0;
+  for (var i = 0; i < selectionLines.length && row === undefined; i++){
+    var tempRow = selectionLines[i];
+    if (selectionLines[i].top > clickY && selectionLines[i].bottom < clickY){
+      cumulativeRowWidth = tempRow.width + cumulativeRowWidth;
+      row = tempRow;
+    }
+  }
+
+  var clickedRowPixel = clickX - row.left;
+  var cumulativeClickedWidth = clickedRowPixel + cumulativeClickedWidth - row.width;
+  var pixelRatio = cumulativeClickedWidth / cumulativeRowWidth;
+  var cursorIndex = Math.ceil(pixelRatio * getTextChildNode(span).textContent.length);
+
+  return {
+    startBlock: attr['block-index'],
+    endBlock: attr['block-index'],
+    startSpan: attr['span-index'],
+    endSpan: attr['span-index'],
+    startIndex: cursorIndex,
+    endIndex: cursorIndex
+  }
 }
 
 function getRangeIndexes(){
@@ -58,41 +96,17 @@ function getTextChildNode(node){
       for (var i = 0; i < node.childNodes.length; i++){
           return getTextChildNode(node.childNodes[i]);
       }
-  } else {
-    // 0 length character that never dirties anything
-    // hack to make empty text node selectable for contenteditable
-    //http://stackoverflow.com/questions/4063144/setting-the-caret-position-to-an-empty-node-inside-a-contenteditable-element
-    //node.appendChild(document.createTextNode("\uFEFF"));
-    node.appendChild(document.createTextNode(""));
-    return node.childNodes[0];
   }
 }
 
-function ensureTextNode(nativeSelection){
-  var baseNode = nativeSelection.baseNode;
-  var extentNode = nativeSelection.extentNode;
-  var startIndex = nativeSelection.baseOffset;
-  var endIndex = nativeSelection.extentOffset;
-  var changed = false;
-
-  // if not a text node
-  if (baseNode.nodeType !== 3){
-    changed = true;
-    baseNode = getTextChildNode(baseNode);
-    startIndex = 0;
-  }
-  if (extentNode.nodeType !== 3){
-    changed = true;
-    extentNode = getTextChildNode(baseNode);
-    endIndex = extentNode.length;
-  }
-  // update on screen selection if anything has changed
-  if (changed){
-    var range = document.createRange();
-    range.setStart(baseNode, startIndex);
-    range.setEnd(extentNode, endIndex);
-    var selection = window.getSelection();
-    selection.removeAllRanges();
-    selection.addRange( range );
-  }
+function determineFontHeight (fontStyle){
+  var body = document.getElementsByTagName("body")[0];
+  var dummy = document.createElement("div");
+  var dummyText = document.createTextNode("M");
+  dummy.appendChild(dummyText);
+  dummy.setAttribute("style", fontStyle);
+  body.appendChild(dummy);
+  var result = dummy.offsetHeight;
+  body.removeChild(dummy);
+  return result;
 }

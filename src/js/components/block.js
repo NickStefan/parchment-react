@@ -8,6 +8,7 @@ var BlockView = React.createClass({
   render: function(){
     var blockIndex = this.props.blockIndex;
     var docId = this.props.docId;
+    var docState = this.props.docState;
     var spanStates = this.props.blockState.get('spans');
     var contentSpans = this.props.block.get('spans')
     .toArray()
@@ -15,7 +16,7 @@ var BlockView = React.createClass({
     .map(function(span,i){
       return (
         <SpanView key={i} spanIndex={i} blockIndex={blockIndex} span={span}
-        spanState={spanStates.get(i)} docId={docId}></SpanView>
+        spanState={spanStates.get(i)} docState={docState} docId={docId}></SpanView>
       )
     });
 
@@ -50,8 +51,9 @@ var BlockView = React.createClass({
   },
 
   shouldComponentUpdate: function(nextProps,nextState){
-    if (this.props.blockState === nextProps.blockState &&
-        this.props.block === nextProps.block) {
+    if (this.props.blockState === nextProps.blockState
+    && this.props.docState === nextProps.docState
+    && this.props.block === nextProps.block) {
       return false;
     }
     return true;

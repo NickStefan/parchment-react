@@ -27320,6 +27320,7 @@ var BlockView = React.createClass({displayName: "BlockView",
   render: function(){
     var blockIndex = this.props.blockIndex;
     var docId = this.props.docId;
+    var docState = this.props.docState;
     var spanStates = this.props.blockState.get('spans');
     var contentSpans = this.props.block.get('spans')
     .toArray()
@@ -27327,7 +27328,7 @@ var BlockView = React.createClass({displayName: "BlockView",
     .map(function(span,i){
       return (
         React.createElement(SpanView, {key: i, spanIndex: i, blockIndex: blockIndex, span: span, 
-        spanState: spanStates.get(i), docId: docId})
+        spanState: spanStates.get(i), docState: docState, docId: docId})
       )
     });
 
@@ -27362,8 +27363,9 @@ var BlockView = React.createClass({displayName: "BlockView",
   },
 
   shouldComponentUpdate: function(nextProps,nextState){
-    if (this.props.blockState === nextProps.blockState &&
-        this.props.block === nextProps.block) {
+    if (this.props.blockState === nextProps.blockState
+    && this.props.docState === nextProps.docState
+    && this.props.block === nextProps.block) {
       return false;
     }
     return true;
@@ -27387,9 +27389,6 @@ var DocView = React.createClass({displayName: "DocView",
   componentWillUnmount: function(){
     window.removeEventListener('keydown',this.preventBrowserBackspace);
   },
-  componentDidUpdate: function(){
-
-  },
   preventBrowserBackspace: function(e){
     // this swallows backspace keys on any non-input element.
     // prevent browser's backspace from popping browser history stack
@@ -27404,18 +27403,28 @@ var DocView = React.createClass({displayName: "DocView",
   },
 
   cursor: function(e){
-    e.stopPropagation();
-    e.preventDefault();
-
-    var range = window.getSelection();
-    if (range.rangeCount){
-      var r = selectionUtil.getRangeIndexes(range);
-      AppActions.setSelection(r.startBlock, r.endBlock, r.startSpan, r.endSpan, r.startIndex, r.endIndex);
-    
-    } else {
-      var r = selectionUtil.getCursorIndexes(e, this.props.docState.get('docId'));
-      AppActions.setSelection(r.startBlock, r.endBlock, r.startSpan, r.endSpan, r.startIndex, r.endIndex);
+    var selection = window.getSelection();
+    if (selection.rangeCount && selection.isCollapsed){
+      var isCollapsed = true;
+      var span = e.target;
+      var attr = this.getAttributes(span);
+      var r = {
+        startBlock: attr['block-index'],
+        endBlock: attr['block-index'],
+        startSpan: attr['span-index'],
+        endSpan: attr['span-index']
+      }
+      AppActions.setSelection(r.startBlock, r.endBlock, r.startSpan, r.endSpan, selection.baseOffset, selection.endOffset, isCollapsed);
     }
+  },
+
+  getAttributes: function(node){
+    var attributes = {};
+    for (var i = 0; i < node.attributes.length; i++){
+      var attr = node.attributes[i];
+      attributes[ attr.name.replace(/^data-/,"") ] = attr.value;
+    }
+      return attributes;
   },
 
   type: function(e){
@@ -27433,6 +27442,7 @@ var DocView = React.createClass({displayName: "DocView",
 
   render: function(){
     var self = this;
+    var docState = this.props.docState;
     var docId = this.props.docState.get('docId');
     var blockStates = this.props.docState.get('blocks');
     var contentBlocks = this.props.doc.get('blocks')
@@ -27441,17 +27451,14 @@ var DocView = React.createClass({displayName: "DocView",
     .map(function(block,i){
       return (
         React.createElement(BlockView, {key: i, blockIndex: i, block: block, 
-        blockState: blockStates.get(i), 
+        blockState: blockStates.get(i), docState: docState, 
         docId: docId})
       )
     });
 
     return (
-      React.createElement("div", null, 
-        React.createElement("div", {onMouseUp: this.cursor, tabIndex: -1, onKeyPress: this.type}, 
-          contentBlocks 
-        ), 
-        React.createElement("span", {className: "testSize" + docId})
+      React.createElement("div", {onMouseUp: this.cursor, tabIndex: -1, onKeyPress: this.type}, 
+        contentBlocks 
       )
     )
   },
@@ -27502,11 +27509,59 @@ module.exports = MENU;
 
 },{"../actions/app-actions":54,"react/dist/react-with-addons.js":53}],60:[function(require,module,exports){
 module.exports = {
-  selectionWrapper: selectionWrapper,
-  getAttributes: getAttributes,
-  getTextChildNode: getTextChildNode,
-  ensureTextNode: ensureTextNode
+  getCursorIndex: getCursorIndex,
+  getRangeIndexes: getRangeIndexes
 };
+
+
+function getCursorIndex(e){
+  // get the span's block and span index
+  var span = e.target;
+  var attr = getAttributes(span);
+
+  // now get the text index:
+  var index;
+  var clickX = e.clientX;
+  var clickY = e.clientY;
+
+  // if a span wraps number lines, get an nice bounded box for each line, using a range!
+  var selection = document.getSelection();
+  var range = document.createRange();
+  range.setStart(getTextChildNode(span), 0);
+  range.setEnd(getTextChildNode(span), getTextChildNode(span).wholeText.length);
+  selection.removeAllRanges();
+  selection.addRange(range);
+  var selectionLines = selection.getRangeAt(0).getClientRects();
+
+  // get the exact row
+  var row;
+  var cumulativeRowWidth = 0;
+  for (var i = 0; i < selectionLines.length && row === undefined; i++){
+    var tempRow = selectionLines[i];
+    if (selectionLines[i].top > clickY && selectionLines[i].bottom < clickY){
+      cumulativeRowWidth = tempRow.width + cumulativeRowWidth;
+      row = tempRow;
+    }
+  }
+
+  var clickedRowPixel = clickX - row.left;
+  var cumulativeClickedWidth = clickedRowPixel + cumulativeClickedWidth - row.width;
+  var pixelRatio = cumulativeClickedWidth / cumulativeRowWidth;
+  var cursorIndex = Math.ceil(pixelRatio * getTextChildNode(span).textContent.length);
+
+  return {
+    startBlock: attr['block-index'],
+    endBlock: attr['block-index'],
+    startSpan: attr['span-index'],
+    endSpan: attr['span-index'],
+    startIndex: cursorIndex,
+    endIndex: cursorIndex
+  }
+}
+
+function getRangeIndexes(){
+  
+}
 
 function selectionWrapper(nativeSelection){
   var selection = {};
@@ -27551,43 +27606,19 @@ function getTextChildNode(node){
       for (var i = 0; i < node.childNodes.length; i++){
           return getTextChildNode(node.childNodes[i]);
       }
-  } else {
-    // 0 length character that never dirties anything
-    // hack to make empty text node selectable for contenteditable
-    //http://stackoverflow.com/questions/4063144/setting-the-caret-position-to-an-empty-node-inside-a-contenteditable-element
-    //node.appendChild(document.createTextNode("\uFEFF"));
-    node.appendChild(document.createTextNode(""));
-    return node.childNodes[0];
   }
 }
 
-function ensureTextNode(nativeSelection){
-  var baseNode = nativeSelection.baseNode;
-  var extentNode = nativeSelection.extentNode;
-  var startIndex = nativeSelection.baseOffset;
-  var endIndex = nativeSelection.extentOffset;
-  var changed = false;
-
-  // if not a text node
-  if (baseNode.nodeType !== 3){
-    changed = true;
-    baseNode = getTextChildNode(baseNode);
-    startIndex = 0;
-  }
-  if (extentNode.nodeType !== 3){
-    changed = true;
-    extentNode = getTextChildNode(baseNode);
-    endIndex = extentNode.length;
-  }
-  // update on screen selection if anything has changed
-  if (changed){
-    var range = document.createRange();
-    range.setStart(baseNode, startIndex);
-    range.setEnd(extentNode, endIndex);
-    var selection = window.getSelection();
-    selection.removeAllRanges();
-    selection.addRange( range );
-  }
+function determineFontHeight (fontStyle){
+  var body = document.getElementsByTagName("body")[0];
+  var dummy = document.createElement("div");
+  var dummyText = document.createTextNode("M");
+  dummy.appendChild(dummyText);
+  dummy.setAttribute("style", fontStyle);
+  body.appendChild(dummy);
+  var result = dummy.offsetHeight;
+  body.removeChild(dummy);
+  return result;
 }
 
 },{}],61:[function(require,module,exports){
@@ -27597,8 +27628,47 @@ var classSet = React.addons.classSet;
 var AppActions = require('../actions/app-actions');
 
 var SpanView = React.createClass({displayName: "SpanView",
+  
+  getTxtValue: function() {
+    // if cursor
+    if (this.props.docState.get('isCollapsed') && this.props.docState.get('startSpan') === this.props.spanIndex.toString()){
+      var offset = this.props.docState.get('startOffset');
+      var value = this.props.span.get('value');
+
+      var val1 = value.slice(0, offset);
+      var val2 = value.slice(offset);
+
+      if (offset === 0 && val2 === ""){
+        return [
+          React.createElement("span", {key: 0, className: 'cursor'})
+        ];
+      }
+      if (offset === 0 && val2 !== ""){
+        return [
+          React.createElement("span", {key: 0, className: 'cursor'}), 
+          React.createElement("span", {key: 1}, val2)
+        ];
+      }
+      if (0 < offset && offset < value.length){
+        return [
+          React.createElement("span", {key: 0}, val1),
+          React.createElement("span", {key: 1, className: 'cursor'}),
+          React.createElement("span", {key: 2}, val2)
+        ];
+      }
+      if (offset === value.length){
+        return [
+          React.createElement("span", {key: 0}, val1), 
+          React.createElement("span", {key: 1, className: 'cursor'})
+        ];
+      }
+    }
+    // if no cursor
+    return this.props.span.get('value');
+  },
+
   render: function(){
-    var value = this.props.span.get('value');
+    var value = this.getTxtValue();
     var blockIndex = this.props.blockIndex;
     var spanIndex = this.props.spanIndex;
     var docId = this.props.docId;
@@ -27612,8 +27682,9 @@ var SpanView = React.createClass({displayName: "SpanView",
   },
 
   shouldComponentUpdate: function(nextProps,nextState){
-    if (this.props.spanState === nextProps.spanState &&
-        this.props.span === nextProps.span) {
+    if (this.props.spanState === nextProps.spanState
+    && this.props.docState === nextProps.docState
+    && this.props.span === nextProps.span) {
       return false;
     }
     return true;
@@ -27727,6 +27798,7 @@ AppStore.dispatchToken = AppDispatcher.register(function(payload){
     default:
       // do nothing
   }
+
   AppStore.emitChange();
   return true;
 });
@@ -27744,7 +27816,7 @@ var _ = {
 
 var defaultSpan = function(){
   return Immutable.Map({
-    value: "bob is a cat."
+    value: "bob is a cat. he has a hat. he hated cats. this is the end of the story."
   });
 }
 
@@ -27824,14 +27896,15 @@ var defaultBlock = function(){
 
 var defaultState = function() {
   return Immutable.Map({
-    'docId': _.random(0,1000000000),
+    'docId': _.random(0,1000000000).toString(),
     'blocks': Immutable.List([ defaultBlock() ]),
     'startBlock': null,
     'endBlock': null,
     'startSpan': null,
     'endSpan': null,
-    'startIndex': null,
-    'endIndex': null
+    'startOffset': null,
+    'endOffset': null,
+    'isCollapsed': null
   });
 };
 
@@ -27840,14 +27913,15 @@ var state = defaultState();
 /////////////////////////////
 // Private State Methods
 var stateMethods = {
-  _setSelection: function(state, startBlock, endBlock, startSpan, endSpan, startIndex, endIndex, chr){
-    return state = state
+  _setSelection: function(state, startBlock, endBlock, startSpan, endSpan, startOffset, endOffset, isCollapsed){
+    return state
     .set('startBlock', startBlock)
     .set('endBlock', endBlock)
     .set('startSpan', startSpan)
     .set('endSpan', endSpan)
-    .set('startIndex', startIndex)
-    .set('endIndex', endIndex);
+    .set('startOffset', startOffset)
+    .set('endOffset', endOffset)
+    .set('isCollapsed', isCollapsed);
   }
 }
 

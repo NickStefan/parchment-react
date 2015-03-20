@@ -54,6 +54,7 @@ AppStore.dispatchToken = AppDispatcher.register(function(payload){
     default:
       // do nothing
   }
+
   AppStore.emitChange();
   return true;
 });

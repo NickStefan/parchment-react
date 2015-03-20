@@ -12,10 +12,6 @@ var docDataStore = require('../stores/doc-data-store');
 var docDataMethods = docDataStore.storeMethods;
 var docData = docDataStore.data;
 
-var docStateStore = require('../stores/doc-state-store');
-var docStateMethods = docStateStore.stateMethods;
-var docState = docStateStore.state;
-
 /////////////////////////////
 // Store Public Methods
 var AppStore = _.extend(EventEmitter.prototype, {
@@ -30,9 +26,6 @@ var AppStore = _.extend(EventEmitter.prototype, {
   },
   getDoc: function(){
     return docData;
-  },
-  getDocState: function(){
-    return docState;
   }
 });
 
@@ -44,20 +37,10 @@ AppStore.dispatchToken = AppDispatcher.register(function(payload){
 
     case ActionTypes.typing:
       docData = docDataMethods._typing(docData, payload.action.args);
-      var newStateData = {
-        startBlock: docData.get('startBlock'),
-        endBlock: docData.get('startBlock'),
-        startSpan: docData.get('startBlock'),
-        endSpan: docData.get('startBlock'),
-        startOffset: docData.get('startBlock'),
-        endOffset: docData.get('startBlock'),
-        isCollapsed: docData.get('startBlock'),
-      };
-      docState = docStateMethods._setSelection(docState, payload.action.args);
       break;
 
     case ActionTypes.setSelection:
-      docState = docStateMethods._setSelection(docState, payload.action.args);
+      docData = docDataMethods._setSelection(docData, payload.action.args);
       break;
     
     default:

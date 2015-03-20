@@ -4,6 +4,35 @@ var classSet = React.addons.classSet;
 var AppActions = require('../actions/app-actions');
 var BlockView = require('./block');
 
+var _ = {
+  last : require('lodash/array/last')
+}
+
+var u_ = {
+  getTextChildNode: function(node){
+    if (node.nodeType === 3){
+        return node;
+    } else if (node.childNodes.length){
+        for (var i = 0; i < node.childNodes.length; i++){
+            return u_.getTextChildNode(node.childNodes[i]);
+        }
+    }
+  },
+  getClassIds: function(node){
+    var classes = {};
+    var classNames = node.className.split(" ");
+    for (var i = 0; i < classNames.length; i++){
+      var cls = classNames[i];
+      if (/^blockId_/.test(cls) || /^spanId_/.test(cls)){
+        var key = cls.replace(/\d+|_/g,"");
+        var val = cls.replace(/\D+/,"");
+        classes[key] = val;
+      }      
+    }
+    return classes;
+  }
+};
+
 var DocView = React.createClass({
   componentDidMount: function(){
     window.addEventListener('keydown', this.preventBrowserBackspace );
@@ -24,6 +53,58 @@ var DocView = React.createClass({
     }
   },
 
+  componentDidUpdate: function(){
+    this.setCursor();
+  },
+  setCursor: function() {
+    // if cursor
+    if (this.props.doc.get('isCollapsed')){
+      var spanId = this.props.doc.get('startSpan');
+      var blockId = this.props.doc.get('startBlock');
+      var classes = 'blockId_' + blockId + ' ' + 'spanId_' + spanId;
+      var span = document.getElementsByClassName(classes)[0];
+
+      // get the selection's exact end point, where cursor should go
+      var selection = document.getSelection();
+      var range = document.createRange();
+      range.setStart(u_.getTextChildNode(span), 0);
+      range.setEnd(u_.getTextChildNode(span), this.props.doc.get('endOffset'));
+      selection.removeAllRanges();
+      selection.addRange(range);
+      var selectionLines = selection.getRangeAt(0).getClientRects();
+      
+      // create or get the cursor node
+      var cursor = document.getElementsByClassName('cursor')[0];
+      if (!cursor){
+        cursor = document.createElement('SPAN');
+        document.getElementsByTagName('BODY')[0].appendChild(cursor);
+        cursor.className = 'cursor';
+        
+        // get the cursor to smoothly blink
+        setTimeout(function(){
+          if (cursor.style.visibility === 'visible'){
+            cursor.style.visibility = 'hidden';
+          } else {
+            cursor.style.visibility = 'visible';
+          }
+        },0);
+        setInterval(function(){
+          if (cursor.style.visibility === 'visible'){
+            cursor.style.visibility = 'hidden';
+          } else {
+            cursor.style.visibility = 'visible';
+          }
+        },500);
+      }
+
+      cursor.style.top = _.last(selectionLines).top.toString() + 'px'; 
+      cursor.style.left = _.last(selectionLines).width.toString() + 'px';
+      cursor.style.height = _.last(selectionLines).height.toString() + 'px';
+
+      selection.removeAllRanges();
+    }
+  },
+
   clearSelection: function(e){
     var cursor = document.getElementsByClassName('cursor')[0];
     if (cursor){
@@ -36,27 +117,18 @@ var DocView = React.createClass({
     if (selection.rangeCount && selection.isCollapsed){
       var isCollapsed = true;
       var span = e.target;
-      var attr = this.getAttributes(span);
+      var c = u_.getClassIds(span);
       var r = {
-        startBlock: attr['block-index'],
-        endBlock: attr['block-index'],
-        startSpan: attr['span-index'],
-        endSpan: attr['span-index']
+        startBlock: c.blockId,
+        endBlock: c.blockId,
+        startSpan: c.spanId,
+        endSpan: c.spanId
       }
       AppActions.setSelection(r.startBlock, r.endBlock, r.startSpan, r.endSpan, selection.baseOffset, selection.extentOffset, isCollapsed);
     }
   },
 
-  getAttributes: function(node){
-    var attributes = {};
-    for (var i = 0; i < node.attributes.length; i++){
-      var attr = node.attributes[i];
-      attributes[ attr.name.replace(/^data-/,"") ] = attr.value;
-    }
-      return attributes;
-  },
-
-  type: function(e){
+  typing: function(e){
     e.stopPropagation();
     e.preventDefault();
 
@@ -71,30 +143,33 @@ var DocView = React.createClass({
 
   render: function(){
     var self = this;
-    var docState = this.props.docState;
-    var docId = this.props.docState.get('docId');
-    var blockStates = this.props.docState.get('blocks');
+    var docId = this.props.doc.get('docId');
     var contentBlocks = this.props.doc.get('blocks')
     .toArray()
     // mutable array of immutables
     .map(function(block,i){
       return (
-        <BlockView key={i} blockIndex={i} block={block}
-        blockState={blockStates.get(i)} docState={docState}
-        docId={docId}></BlockView>
+        <BlockView
+          key={i}
+          blockIndex={i}
+          block={block}
+          docId={docId}>
+        </BlockView>
       )
     });
 
     return (
-      <div onMouseDown={this.clearSelection} onMouseUp={this.setSelection} tabIndex={-1} onKeyPress={this.type}>
-        { contentBlocks }
+      <div
+        onMouseDown={this.clearSelection}
+        onMouseUp={this.setSelection}
+        tabIndex={-1} onKeyPress={this.typing}>
+          { contentBlocks }
       </div>
     )
   },
 
   shouldComponentUpdate: function(nextProps,nextState){
-    if (this.props.docState === nextProps.docState &&
-        this.props.doc === nextProps.doc) {
+    if (this.props.doc === nextProps.doc) {
       return false;
     }
     return true;

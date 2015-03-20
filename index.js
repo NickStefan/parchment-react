@@ -27294,15 +27294,10 @@ function getDoc(){
   return AppStore.getDoc();
 }
 
-function getDocState(){
-  return AppStore.getDocState();
-}
-
 var APP = React.createClass({displayName: "APP",
   getInitialState: function(){
     return {
-      doc: getDoc(),
-      docState: getDocState()
+      doc: getDoc()
     };
   },
   componentWillMount: function(){
@@ -27313,15 +27308,14 @@ var APP = React.createClass({displayName: "APP",
   },
   _onChange: function(){
     this.setState({
-      doc: getDoc(),
-      docState: getDocState()
+      doc: getDoc()
     });
   },
   render: function(){
     return (
       React.createElement("div", null, 
-        React.createElement(MenuView, {doc: this.state.doc, docState: this.state.docState}), 
-        React.createElement(DocView, {doc: this.state.doc, docState: this.state.docState})
+        React.createElement(MenuView, {doc: this.state.doc}), 
+        React.createElement(DocView, {doc: this.state.doc})
       )
     )
   }
@@ -27341,52 +27335,58 @@ var BlockView = React.createClass({displayName: "BlockView",
   render: function(){
     var blockIndex = this.props.blockIndex;
     var docId = this.props.docId;
-    var docState = this.props.docState;
-    var spanStates = this.props.blockState.get('spans');
     var contentSpans = this.props.block.get('spans')
     .toArray()
     // mutable array of immutables
     .map(function(span,i){
       return (
-        React.createElement(SpanView, {key: i, spanIndex: i, blockIndex: blockIndex, span: span, 
-        spanState: spanStates.get(i), docState: docState, docId: docId})
+        React.createElement(SpanView, {
+          key: i, 
+          spanIndex: i, 
+          blockIndex: blockIndex, 
+          span: span, 
+          docId: docId}
+        )
       )
     });
 
     var tag = this.props.block.get('type');
     var block;
 
+    var classObj = {};
+    classObj[ 'blockId_' + blockIndex] = true;
+    classObj[ 'docId_' + docId] = true;
+    var classes = classSet(classObj);
+
     switch(tag) {
       case 'paragraph':
-        block = React.createElement("p", {"data-block-index": blockIndex, "data-doc-id": docId}, contentSpans)
+        block = React.createElement("p", {classSet: classes}, contentSpans)
         break;
 
       case 'header1':
-        block = React.createElement("h1", {"data-block-index": blockIndex, "data-doc-id": docId}, contentSpans)
+        block = React.createElement("h1", {className: classes}, contentSpans)
         break;
       case 'header2':
-        block = React.createElement("h2", {"data-block-index": blockIndex, "data-doc-id": docId}, contentSpans)
+        block = React.createElement("h2", {className: classes}, contentSpans)
         break;
       case 'header3':
-        block = React.createElement("h3", {"data-block-index": blockIndex, "data-doc-id": docId}, contentSpans)
+        block = React.createElement("h3", {className: classes}, contentSpans)
         break;
       case 'header4':
-        block = React.createElement("h4", {"data-block-index": blockIndex, "data-doc-id": docId}, contentSpans)
+        block = React.createElement("h4", {className: classes}, contentSpans)
         break;
       case 'header5':
-        block = React.createElement("h5", {"data-block-index": blockIndex, "data-doc-id": docId}, contentSpans)
+        block = React.createElement("h5", {className: classes}, contentSpans)
         break;
       case 'header6':
-        block = React.createElement("h6", {"data-block-index": blockIndex, "data-doc-id": docId}, contentSpans)
+        block = React.createElement("h6", {className: classes}, contentSpans)
         break;
     }
     return block;
   },
 
   shouldComponentUpdate: function(nextProps,nextState){
-    if (this.props.blockState === nextProps.blockState
-    && this.props.docState === nextProps.docState
-    && this.props.block === nextProps.block) {
+    if (this.props.block === nextProps.block) {
       return false;
     }
     return true;
@@ -27401,6 +27401,35 @@ var classSet = React.addons.classSet;
 
 var AppActions = require('../actions/app-actions');
 var BlockView = require('./block');
+
+var _ = {
+  last : require('lodash/array/last')
+}
+
+var u_ = {
+  getTextChildNode: function(node){
+    if (node.nodeType === 3){
+        return node;
+    } else if (node.childNodes.length){
+        for (var i = 0; i < node.childNodes.length; i++){
+            return u_.getTextChildNode(node.childNodes[i]);
+        }
+    }
+  },
+  getClassIds: function(node){
+    var classes = {};
+    var classNames = node.className.split(" ");
+    for (var i = 0; i < classNames.length; i++){
+      var cls = classNames[i];
+      if (/^blockId_/.test(cls) || /^spanId_/.test(cls)){
+        var key = cls.replace(/\d+|_/g,"");
+        var val = cls.replace(/\D+/,"");
+        classes[key] = val;
+      }      
+    }
+    return classes;
+  }
+};
 
 var DocView = React.createClass({displayName: "DocView",
   componentDidMount: function(){
@@ -27422,141 +27451,22 @@ var DocView = React.createClass({displayName: "DocView",
     }
   },
 
-  clearSelection: function(e){
-    var cursor = document.getElementsByClassName('cursor')[0];
-    if (cursor){
-      document.getElementsByTagName('BODY')[0].removeChild(cursor);
-    }
-  },
-
-  setSelection: function(e){
-    var selection = window.getSelection();
-    if (selection.rangeCount && selection.isCollapsed){
-      var isCollapsed = true;
-      var span = e.target;
-      var attr = this.getAttributes(span);
-      var r = {
-        startBlock: attr['block-index'],
-        endBlock: attr['block-index'],
-        startSpan: attr['span-index'],
-        endSpan: attr['span-index']
-      }
-      AppActions.setSelection(r.startBlock, r.endBlock, r.startSpan, r.endSpan, selection.baseOffset, selection.extentOffset, isCollapsed);
-    }
-  },
-
-  getAttributes: function(node){
-    var attributes = {};
-    for (var i = 0; i < node.attributes.length; i++){
-      var attr = node.attributes[i];
-      attributes[ attr.name.replace(/^data-/,"") ] = attr.value;
-    }
-      return attributes;
-  },
-
-  type: function(e){
-    e.stopPropagation();
-    e.preventDefault();
-
-    // SIMPLE INSERT
-    if (simple && e.keyCode !== 8){
-      AppActions.simpleInsert(startBlock, endBlock, startSpan, endSpan, startIndex, endIndex, e.key);
-    // SIMPLE DELETE
-    } else if (simple && e.keyCode === 8){
-      AppActions.simpleRemove(startBlock, endBlock, startSpan, endSpan, startIndex, endIndex, e.key);
-    }
-  },
-
-  render: function(){
-    var self = this;
-    var docState = this.props.docState;
-    var docId = this.props.docState.get('docId');
-    var blockStates = this.props.docState.get('blocks');
-    var contentBlocks = this.props.doc.get('blocks')
-    .toArray()
-    // mutable array of immutables
-    .map(function(block,i){
-      return (
-        React.createElement(BlockView, {key: i, blockIndex: i, block: block, 
-        blockState: blockStates.get(i), docState: docState, 
-        docId: docId})
-      )
-    });
-
-    return (
-      React.createElement("div", {onMouseDown: this.clearSelection, onMouseUp: this.setSelection, tabIndex: -1, onKeyPress: this.type}, 
-        contentBlocks 
-      )
-    )
-  },
-
-  shouldComponentUpdate: function(nextProps,nextState){
-    if (this.props.docState === nextProps.docState &&
-        this.props.doc === nextProps.doc) {
-      return false;
-    }
-    return true;
-  }
-
-});
-
-module.exports = DocView;
-
-
-},{"../actions/app-actions":55,"./block":58,"react/dist/react-with-addons.js":54}],60:[function(require,module,exports){
-var React = require('react/dist/react-with-addons.js');
-
-var AppActions = require('../actions/app-actions');
-
-var MENU = React.createClass({displayName: "MENU",
-
-  undo: function(e){
-    e.stopPropagation();
-    e.preventDefault();
-    AppActions.undo();
-  },
-  redo: function(e){
-    e.stopPropagation();
-    e.preventDefault();
-    AppActions.redo();
-  },
-
-  render: function(){
-    return (
-      React.createElement("div", null, 
-        React.createElement("button", {onClick: this.undo}, " undo "), 
-        React.createElement("button", {onClick: this.redo}, " redo ")
-      )
-    )
-  }
-});
-
-module.exports = MENU;
-
-
-},{"../actions/app-actions":55,"react/dist/react-with-addons.js":54}],61:[function(require,module,exports){
-var React = require('react/dist/react-with-addons.js');
-var _ = {
-  last: require('lodash/array/last')
-};
-var classSet = React.addons.classSet;
-
-var AppActions = require('../actions/app-actions');
-
-var SpanView = React.createClass({displayName: "SpanView",
   componentDidUpdate: function(){
     this.setCursor();
   },
-
   setCursor: function() {
     // if cursor
-    if (this.props.docState.get('isCollapsed') && this.props.docState.get('startSpan') === this.props.spanIndex.toString()){
-      var span = this.getDOMNode();
+    if (this.props.doc.get('isCollapsed')){
+      var spanId = this.props.doc.get('startSpan');
+      var blockId = this.props.doc.get('startBlock');
+      var classes = 'blockId_' + blockId + ' ' + 'spanId_' + spanId;
+      var span = document.getElementsByClassName(classes)[0];
+
       // get the selection's exact end point, where cursor should go
       var selection = document.getSelection();
       var range = document.createRange();
-      range.setStart(this.getTextChildNode(span), 0);
-      range.setEnd(this.getTextChildNode(span), this.props.docState.get('endOffset'));
+      range.setStart(u_.getTextChildNode(span), 0);
+      range.setEnd(u_.getTextChildNode(span), this.props.docState.get('endOffset'));
       selection.removeAllRanges();
       selection.addRange(range);
       var selectionLines = selection.getRangeAt(0).getClientRects();
@@ -27593,15 +27503,118 @@ var SpanView = React.createClass({displayName: "SpanView",
     }
   },
 
-  getTextChildNode: function(node){
-    if (node.nodeType === 3){
-        return node;
-    } else if (node.childNodes.length){
-        for (var i = 0; i < node.childNodes.length; i++){
-            return this.getTextChildNode(node.childNodes[i]);
-        }
+  clearSelection: function(e){
+    var cursor = document.getElementsByClassName('cursor')[0];
+    if (cursor){
+      document.getElementsByTagName('BODY')[0].removeChild(cursor);
     }
   },
+
+  setSelection: function(e){
+    var selection = window.getSelection();
+    if (selection.rangeCount && selection.isCollapsed){
+      var isCollapsed = true;
+      var span = e.target;
+      var c = u_.getClassIds(span);
+      var r = {
+        startBlock: c.blockId,
+        endBlock: c.blockId,
+        startSpan: c.spanId,
+        endSpan: c.spanId
+      }
+      AppActions.setSelection(r.startBlock, r.endBlock, r.startSpan, r.endSpan, selection.baseOffset, selection.extentOffset, isCollapsed);
+    }
+  },
+
+  typing: function(e){
+    e.stopPropagation();
+    e.preventDefault();
+
+    // SIMPLE INSERT
+    if (simple && e.keyCode !== 8){
+      AppActions.simpleInsert(startBlock, endBlock, startSpan, endSpan, startIndex, endIndex, e.key);
+    // SIMPLE DELETE
+    } else if (simple && e.keyCode === 8){
+      AppActions.simpleRemove(startBlock, endBlock, startSpan, endSpan, startIndex, endIndex, e.key);
+    }
+  },
+
+  render: function(){
+    var self = this;
+    var docId = this.props.doc.get('docId');
+    var contentBlocks = this.props.doc.get('blocks')
+    .toArray()
+    // mutable array of immutables
+    .map(function(block,i){
+      return (
+        React.createElement(BlockView, {
+          key: i, 
+          blockIndex: i, 
+          block: block, 
+          docId: docId}
+        )
+      )
+    });
+
+    return (
+      React.createElement("div", {
+        onMouseDown: this.clearSelection, 
+        onMouseUp: this.setSelection, 
+        tabIndex: -1, onKeyPress: this.typing}, 
+          contentBlocks 
+      )
+    )
+  },
+
+  shouldComponentUpdate: function(nextProps,nextState){
+    if (this.props.doc === nextProps.doc) {
+      return false;
+    }
+    return true;
+  }
+
+});
+
+module.exports = DocView;
+
+
+},{"../actions/app-actions":55,"./block":58,"lodash/array/last":6,"react/dist/react-with-addons.js":54}],60:[function(require,module,exports){
+var React = require('react/dist/react-with-addons.js');
+
+var AppActions = require('../actions/app-actions');
+
+var MENU = React.createClass({displayName: "MENU",
+
+  undo: function(e){
+    e.stopPropagation();
+    e.preventDefault();
+    AppActions.undo();
+  },
+  redo: function(e){
+    e.stopPropagation();
+    e.preventDefault();
+    AppActions.redo();
+  },
+
+  render: function(){
+    return (
+      React.createElement("div", null, 
+        React.createElement("button", {onClick: this.undo}, " undo "), 
+        React.createElement("button", {onClick: this.redo}, " redo ")
+      )
+    )
+  }
+});
+
+module.exports = MENU;
+
+
+},{"../actions/app-actions":55,"react/dist/react-with-addons.js":54}],61:[function(require,module,exports){
+var React = require('react/dist/react-with-addons.js');
+
+var classSet = React.addons.classSet;
+
+var SpanView = React.createClass({displayName: "SpanView",
 
   render: function(){
     var value = this.props.span.get('value');
@@ -27609,18 +27622,21 @@ var SpanView = React.createClass({displayName: "SpanView",
     var spanIndex = this.props.spanIndex;
     var docId = this.props.docId;
 
+    var classObj = {};
+    classObj[ 'blockId_' + blockIndex] = true;
+    classObj[ 'docId_' + docId] = true;
+    classObj[ 'spanId_' + spanIndex] = true;
+    var classes = classSet(classObj);
+
     return (
-      React.createElement("span", {"data-span-index": spanIndex, "data-block-index": blockIndex, 
-      "data-doc-id": docId}, 
-        value 
+      React.createElement("span", {className: classes}, 
+          value 
       )
     )
   },
 
   shouldComponentUpdate: function(nextProps,nextState){
-    if (this.props.spanState === nextProps.spanState
-    && this.props.docState === nextProps.docState
-    && this.props.span === nextProps.span) {
+    if (this.props.span === nextProps.span) {
       return false;
     }
     return true;
@@ -27629,7 +27645,7 @@ var SpanView = React.createClass({displayName: "SpanView",
 
 module.exports = SpanView;
 
-},{"../actions/app-actions":55,"lodash/array/last":6,"react/dist/react-with-addons.js":54}],62:[function(require,module,exports){
+},{"react/dist/react-with-addons.js":54}],62:[function(require,module,exports){
 module.exports = {
   ActionTypes: {
     undo: 'undo',
@@ -27692,10 +27708,6 @@ var docDataStore = require('../stores/doc-data-store');
 var docDataMethods = docDataStore.storeMethods;
 var docData = docDataStore.data;
 
-var docStateStore = require('../stores/doc-state-store');
-var docStateMethods = docStateStore.stateMethods;
-var docState = docStateStore.state;
-
 /////////////////////////////
 // Store Public Methods
 var AppStore = _.extend(EventEmitter.prototype, {
@@ -27710,9 +27722,6 @@ var AppStore = _.extend(EventEmitter.prototype, {
   },
   getDoc: function(){
     return docData;
-  },
-  getDocState: function(){
-    return docState;
   }
 });
 
@@ -27724,20 +27733,10 @@ AppStore.dispatchToken = AppDispatcher.register(function(payload){
 
     case ActionTypes.typing:
       docData = docDataMethods._typing(docData, payload.action.args);
-      var newStateData = {
-        startBlock: docData.get('startBlock'),
-        endBlock: docData.get('startBlock'),
-        startSpan: docData.get('startBlock'),
-        endSpan: docData.get('startBlock'),
-        startOffset: docData.get('startBlock'),
-        endOffset: docData.get('startBlock'),
-        isCollapsed: docData.get('startBlock'),
-      };
-      docState = docStateMethods._setSelection(docState, payload.action.args);
       break;
 
     case ActionTypes.setSelection:
-      docState = docStateMethods._setSelection(docState, payload.action.args);
+      docData = docDataMethods._setSelection(docData, payload.action.args);
       break;
     
     default:
@@ -27750,10 +27749,11 @@ AppStore.dispatchToken = AppDispatcher.register(function(payload){
 
 module.exports = AppStore;
 
-},{"../constants/app-constants":62,"../dispatchers/app-dispatcher":63,"../stores/doc-data-store":66,"../stores/doc-state-store":67,"events":4,"lodash/object/extend":45}],66:[function(require,module,exports){
+},{"../constants/app-constants":62,"../dispatchers/app-dispatcher":63,"../stores/doc-data-store":66,"events":4,"lodash/object/extend":45}],66:[function(require,module,exports){
 var Immutable = require('immutable');
 var _ = {
-  mapValues: require('lodash/object/mapValues')
+  mapValues: require('lodash/object/mapValues'),
+  random: require('lodash/number/random')
 };
 
 /////////////////////////////
@@ -27774,7 +27774,15 @@ var defaultBlock = function(){
 
 var defaultData = function() {
   return Immutable.Map({
-    'blocks': Immutable.List([ defaultBlock() ])
+    'blocks': Immutable.List([ defaultBlock() ]),
+    'docId': _.random(0,1000000000).toString(),
+    'startBlock': null,
+    'endBlock': null,
+    'startSpan': null,
+    'endSpan': null,
+    'startOffset': null,
+    'endOffset': null,
+    'isCollapsed': null
   });
 };
 
@@ -27783,6 +27791,18 @@ var data = defaultData();
 /////////////////////////////
 // Private Data Methods
 var storeMethods = {
+
+  _setSelection: function(data, startBlock, endBlock, startSpan, endSpan, startOffset, endOffset, isCollapsed){
+    return data
+    .set('startBlock', startBlock)
+    .set('endBlock', endBlock)
+    .set('startSpan', startSpan)
+    .set('endSpan', endSpan)
+    .set('startOffset', startOffset)
+    .set('endOffset', endOffset)
+    .set('isCollapsed', isCollapsed);
+  },
+
   _typing: function(data, startBlock, endBlock, startSpan, endSpan, startIndex, endIndex, isCollapsed, chr) {
     // splice new character in at the index
     return data.updateIn(['blocks', startBlock, 'spans', startSpan],function(textNode){
@@ -27817,80 +27837,5 @@ module.exports = {
   storeMethods: storeMethods,
   data: data
 };
-
-},{"immutable":5,"lodash/object/mapValues":49}],67:[function(require,module,exports){
-var Immutable = require('immutable');
-var _ = {
-  mapValues: require('lodash/object/mapValues'),
-  random: require('lodash/number/random')
-};
-
-/////////////////////////////
-// State Model
-
-var defaultSpan = function(){
-  return Immutable.Map({});
-}
-
-var defaultBlock = function(){
-  return Immutable.Map({
-    type: 'paragraph',
-    spans: Immutable.List([ defaultSpan() ])
-  });
-}
-
-var defaultState = function() {
-  return Immutable.Map({
-    'docId': _.random(0,1000000000).toString(),
-    'blocks': Immutable.List([ defaultBlock() ]),
-    'startBlock': null,
-    'endBlock': null,
-    'startSpan': null,
-    'endSpan': null,
-    'startOffset': null,
-    'endOffset': null,
-    'isCollapsed': null
-  });
-};
-
-var state = defaultState();
-
-/////////////////////////////
-// Private State Methods
-var stateMethods = {
-  _setSelection: function(state, startBlock, endBlock, startSpan, endSpan, startOffset, endOffset, isCollapsed){
-    return state
-    .set('startBlock', startBlock)
-    .set('endBlock', endBlock)
-    .set('startSpan', startSpan)
-    .set('endSpan', endSpan)
-    .set('startOffset', startOffset)
-    .set('endOffset', endOffset)
-    .set('isCollapsed', isCollapsed);
-  }
-}
-
-// map the invoked arguments to the expected arguments defined above.
-// this is a convenience to keep actions, dispatchers, etc generic
-// up until actually invoking the store methods above
-// example: 
-// invoked in the dispatcher as:
-//   store.Method(store1, args); 
-// invokes the methods defined above as
-//   store.Method(store1, args[0], args[1] ... etc )
-stateMethods = _.mapValues(stateMethods, function(fn,fnName,classObj) {
-  return function(){
-    var store = arguments[0];
-    arguments[1] = arguments[1] || [];
-    var dispatchedArgs = arguments[1].length ? arguments[1] : undefined;
-    var args = [ store ].concat(dispatchedArgs);
-    return fn.apply(classObj, args);
-  }
-});
-
-module.exports = {
-  stateMethods: stateMethods,
-  state: state
-}
 
 },{"immutable":5,"lodash/number/random":43,"lodash/object/mapValues":49}]},{},[64])

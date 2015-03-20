@@ -8,10 +8,6 @@ function getDoc(){
   return AppStore.getDoc();
 }
 
-function getDocState(){
-  return AppStore.getDocState();
-}
-
 var APP = React.createClass({
   getInitialState: function(){
     return {
@@ -26,15 +22,14 @@ var APP = React.createClass({
   },
   _onChange: function(){
     this.setState({
-      doc: getDoc(),
-      docState: getDocState()
+      doc: getDoc()
     });
   },
   render: function(){
     return (
       <div>
-        <MenuView doc={this.state.doc } docState={this.state.docState} />
-        <DocView doc={this.state.doc } docState={this.state.docState} />
+        <MenuView doc={this.state.doc } />
+        <DocView doc={this.state.doc } />
       </div>
     )
   }

@@ -1,6 +1,7 @@
 var Immutable = require('immutable');
 var _ = {
-  mapValues: require('lodash/object/mapValues')
+  mapValues: require('lodash/object/mapValues'),
+  random: require('lodash/number/random')
 };
 
 /////////////////////////////
@@ -21,7 +22,15 @@ var defaultBlock = function(){
 
 var defaultData = function() {
   return Immutable.Map({
-    'blocks': Immutable.List([ defaultBlock() ])
+    'blocks': Immutable.List([ defaultBlock() ]),
+    'docId': _.random(0,1000000000).toString(),
+    'startBlock': null,
+    'endBlock': null,
+    'startSpan': null,
+    'endSpan': null,
+    'startOffset': null,
+    'endOffset': null,
+    'isCollapsed': null
   });
 };
 
@@ -30,6 +39,18 @@ var data = defaultData();
 /////////////////////////////
 // Private Data Methods
 var storeMethods = {
+
+  _setSelection: function(data, startBlock, endBlock, startSpan, endSpan, startOffset, endOffset, isCollapsed){
+    return data
+    .set('startBlock', startBlock)
+    .set('endBlock', endBlock)
+    .set('startSpan', startSpan)
+    .set('endSpan', endSpan)
+    .set('startOffset', startOffset)
+    .set('endOffset', endOffset)
+    .set('isCollapsed', isCollapsed);
+  },
+
   _typing: function(data, startBlock, endBlock, startSpan, endSpan, startIndex, endIndex, isCollapsed, chr) {
     // splice new character in at the index
     return data.updateIn(['blocks', startBlock, 'spans', startSpan],function(textNode){

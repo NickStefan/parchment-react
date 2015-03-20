@@ -56,18 +56,17 @@ var storeMethods = {
     var startOffset = data.get('startOffset');
     var endOffset = data.get('endOffset');
     var indexChange;
+    var collapsedDelete = false;
 
     if (chr === undefined){
-      indexChange = -1;
+      indexChange = 0;
     }
     if (chr === undefined && startOffset === endOffset){
       startOffset = startOffset - 1;
+      indexChange = 0;
     }
     if (chr && chr.length){
       indexChange = chr.length;
-    }
-    if (chr && chr.length && startOffset === endOffset){
-      indexchange = chr.length;
     }
 
     // splice new character in at the index

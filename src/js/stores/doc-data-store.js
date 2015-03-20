@@ -52,7 +52,6 @@ var storeMethods = {
   },
 
   _typing: function(data, chr) {
-    debugger
     var startOffset = data.get('startOffset');
     var endOffset = data.get('endOffset');
     var indexChange;

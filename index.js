@@ -27446,7 +27446,7 @@ var DocView = React.createClass({displayName: "DocView",
       if(!regex.test(e.target.tagName) || e.target.disabled || e.target.readOnly ){
           e.preventDefault();
           e.stopPropagation();
-          this.type(e);
+          this.typing(e);
       }
     }
   },
@@ -27466,7 +27466,7 @@ var DocView = React.createClass({displayName: "DocView",
       var selection = document.getSelection();
       var range = document.createRange();
       range.setStart(u_.getTextChildNode(span), 0);
-      range.setEnd(u_.getTextChildNode(span), this.props.docState.get('endOffset'));
+      range.setEnd(u_.getTextChildNode(span), this.props.doc.get('endOffset'));
       selection.removeAllRanges();
       selection.addRange(range);
       var selectionLines = selection.getRangeAt(0).getClientRects();
@@ -27512,6 +27512,7 @@ var DocView = React.createClass({displayName: "DocView",
 
   setSelection: function(e){
     var selection = window.getSelection();
+    // A single caret
     if (selection.rangeCount && selection.isCollapsed){
       var isCollapsed = true;
       var span = e.target;
@@ -27523,20 +27524,26 @@ var DocView = React.createClass({displayName: "DocView",
         endSpan: c.spanId
       }
       AppActions.setSelection(r.startBlock, r.endBlock, r.startSpan, r.endSpan, selection.baseOffset, selection.extentOffset, isCollapsed);
+    
+    // a range
+    } else if (selection.rangeCount) {
+      var isCollapsed = false;
+      var r = selection.getRangeAt(0);
+      var startBlock = u_.getClassIds(r.startContainer.parentNode).blockId;
+      var endBlock = u_.getClassIds(r.endContainer.parentNode).blockId;
+      var startSpan = u_.getClassIds(r.startContainer.parentNode).spanId;
+      var endSpan = u_.getClassIds(r.endContainer.parentNode).spanId;
+      var startOffset = r.startOffset;
+      var endOffset = r.endOffset;
+
+      AppActions.setSelection(startBlock, endBlock, startSpan, endSpan, startOffset, endOffset, isCollapsed);
     }
   },
 
   typing: function(e){
     e.stopPropagation();
     e.preventDefault();
-
-    // SIMPLE INSERT
-    if (simple && e.keyCode !== 8){
-      AppActions.simpleInsert(startBlock, endBlock, startSpan, endSpan, startIndex, endIndex, e.key);
-    // SIMPLE DELETE
-    } else if (simple && e.keyCode === 8){
-      AppActions.simpleRemove(startBlock, endBlock, startSpan, endSpan, startIndex, endIndex, e.key);
-    }
+    AppActions.typing(e.key);
   },
 
   render: function(){
@@ -27803,14 +27810,37 @@ var storeMethods = {
     .set('isCollapsed', isCollapsed);
   },
 
-  _typing: function(data, startBlock, endBlock, startSpan, endSpan, startIndex, endIndex, isCollapsed, chr) {
+  _typing: function(data, chr) {
+    debugger
+    var startOffset = data.get('startOffset');
+    var endOffset = data.get('endOffset');
+    var indexChange;
+
+    if (chr === undefined){
+      indexChange = -1;
+    }
+    if (chr === undefined && startOffset === endOffset){
+      startOffset = startOffset - 1;
+    }
+    if (chr && chr.length){
+      indexChange = chr.length;
+    }
+    if (chr && chr.length && startOffset === endOffset){
+      indexchange = chr.length;
+    }
+
     // splice new character in at the index
-    return data.updateIn(['blocks', startBlock, 'spans', startSpan],function(textNode){
+    data = data.updateIn(['blocks', data.get('startBlock'), 'spans', data.get('startSpan')],function(textNode){
       var strArr = textNode.get('value').split("");
       strArr.splice(startOffset, endOffset - startOffset, chr);
       str = strArr.join("");
       return textNode.set('value', str);
     });
+
+    return data
+    .set('endOffset', parseInt(startOffset) + indexChange)
+    .set('startOffset', parseInt(startOffset) + indexChange)
+    .set('isCollapsed', true);
   }
 
 }

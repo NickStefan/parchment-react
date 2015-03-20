@@ -51,14 +51,37 @@ var storeMethods = {
     .set('isCollapsed', isCollapsed);
   },
 
-  _typing: function(data, startBlock, endBlock, startSpan, endSpan, startIndex, endIndex, isCollapsed, chr) {
+  _typing: function(data, chr) {
+    debugger
+    var startOffset = data.get('startOffset');
+    var endOffset = data.get('endOffset');
+    var indexChange;
+
+    if (chr === undefined){
+      indexChange = -1;
+    }
+    if (chr === undefined && startOffset === endOffset){
+      startOffset = startOffset - 1;
+    }
+    if (chr && chr.length){
+      indexChange = chr.length;
+    }
+    if (chr && chr.length && startOffset === endOffset){
+      indexchange = chr.length;
+    }
+
     // splice new character in at the index
-    return data.updateIn(['blocks', startBlock, 'spans', startSpan],function(textNode){
+    data = data.updateIn(['blocks', data.get('startBlock'), 'spans', data.get('startSpan')],function(textNode){
       var strArr = textNode.get('value').split("");
       strArr.splice(startOffset, endOffset - startOffset, chr);
       str = strArr.join("");
       return textNode.set('value', str);
     });
+
+    return data
+    .set('endOffset', parseInt(startOffset) + indexChange)
+    .set('startOffset', parseInt(startOffset) + indexChange)
+    .set('isCollapsed', true);
   }
 
 }

@@ -48,7 +48,7 @@ var DocView = React.createClass({
       if(!regex.test(e.target.tagName) || e.target.disabled || e.target.readOnly ){
           e.preventDefault();
           e.stopPropagation();
-          this.type(e);
+          this.typing(e);
       }
     }
   },
@@ -114,6 +114,7 @@ var DocView = React.createClass({
 
   setSelection: function(e){
     var selection = window.getSelection();
+    // A single caret
     if (selection.rangeCount && selection.isCollapsed){
       var isCollapsed = true;
       var span = e.target;
@@ -125,20 +126,26 @@ var DocView = React.createClass({
         endSpan: c.spanId
       }
       AppActions.setSelection(r.startBlock, r.endBlock, r.startSpan, r.endSpan, selection.baseOffset, selection.extentOffset, isCollapsed);
+    
+    // a range
+    } else if (selection.rangeCount) {
+      var isCollapsed = false;
+      var r = selection.getRangeAt(0);
+      var startBlock = u_.getClassIds(r.startContainer.parentNode).blockId;
+      var endBlock = u_.getClassIds(r.endContainer.parentNode).blockId;
+      var startSpan = u_.getClassIds(r.startContainer.parentNode).spanId;
+      var endSpan = u_.getClassIds(r.endContainer.parentNode).spanId;
+      var startOffset = r.startOffset;
+      var endOffset = r.endOffset;
+
+      AppActions.setSelection(startBlock, endBlock, startSpan, endSpan, startOffset, endOffset, isCollapsed);
     }
   },
 
   typing: function(e){
     e.stopPropagation();
     e.preventDefault();
-
-    // SIMPLE INSERT
-    if (simple && e.keyCode !== 8){
-      AppActions.simpleInsert(startBlock, endBlock, startSpan, endSpan, startIndex, endIndex, e.key);
-    // SIMPLE DELETE
-    } else if (simple && e.keyCode === 8){
-      AppActions.simpleRemove(startBlock, endBlock, startSpan, endSpan, startIndex, endIndex, e.key);
-    }
+    AppActions.typing(e.key);
   },
 
   render: function(){

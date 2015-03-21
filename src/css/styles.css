@@ -9,6 +9,7 @@ span, div, p {
   	border: none;
 	overflow: auto;
 	outline: none;
+	white-space: pre-wrap;
 
 	-webkit-box-shadow: none;
 	-moz-box-shadow: none;

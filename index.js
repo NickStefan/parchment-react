@@ -27496,7 +27496,7 @@ var DocView = React.createClass({displayName: "DocView",
       }
 
       cursor.style.top = _.last(selectionLines).top.toString() + 'px'; 
-      cursor.style.left = _.last(selectionLines).width.toString() + 'px';
+      cursor.style.left = _.last(selectionLines).right.toString() + 'px';
       cursor.style.height = _.last(selectionLines).height.toString() + 'px';
 
       selection.removeAllRanges();
@@ -27624,7 +27624,7 @@ var classSet = React.addons.classSet;
 var SpanView = React.createClass({displayName: "SpanView",
 
   render: function(){
-    var value = this.props.span.get('value');
+    var value = this.props.span.get('value')//.replace(/\s{2,}/g,'\u00a0\u00a0');
     var blockIndex = this.props.blockIndex;
     var spanIndex = this.props.spanIndex;
     var docId = this.props.docId;
@@ -27811,7 +27811,6 @@ var storeMethods = {
   },
 
   _typing: function(data, chr) {
-    debugger
     var startOffset = data.get('startOffset');
     var endOffset = data.get('endOffset');
     var indexChange;

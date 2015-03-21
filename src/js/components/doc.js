@@ -98,7 +98,7 @@ var DocView = React.createClass({
       }
 
       cursor.style.top = _.last(selectionLines).top.toString() + 'px'; 
-      cursor.style.left = _.last(selectionLines).width.toString() + 'px';
+      cursor.style.left = _.last(selectionLines).right.toString() + 'px';
       cursor.style.height = _.last(selectionLines).height.toString() + 'px';
 
       selection.removeAllRanges();
